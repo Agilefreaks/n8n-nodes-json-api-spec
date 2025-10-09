@@ -50,7 +50,7 @@ export class JsonApiSerializer implements INodeType {
 				displayName: 'ID',
 				name: 'resource_id',
 				type: 'string',
-				default: 'resource',
+				default: '={{ $json.id.toString() }}',
 				description: 'The type of the resource',
 				required: true,
 			},
@@ -59,10 +59,10 @@ export class JsonApiSerializer implements INodeType {
 				name: 'resource_attributes',
 				type: 'json',
 				placeholder: 'Add attributes as json',
-				default: '',
+				default: "={{ $json.removeField('id').toJsonString() }}",
 				description: 'The attributes of the resource',
-				required: true
-			}
+				required: true,
+			},
 		],
 	};
 
