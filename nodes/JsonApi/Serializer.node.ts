@@ -23,45 +23,47 @@ export class Serializer implements INodeType {
 		outputs: ['main'],
 		properties: [
 			{
-				displayName: 'Reponse Type',
+				displayName: 'Response',
 				name: 'response_type',
 				type: 'options',
 				options: [
 					{
-						name: 'Object',
+						name: 'Resource Object',
 						value: 'object',
 					},
 					{
-						name: 'Array',
+						name: 'Resources Array',
 						value: 'array',
 					},
 				],
 				default: 'object',
+				description: 'What type of data to serialize: array or single object',
 				required: true,
-				description: 'What type of data to serialize: array or object',
 			},
 			{
-				displayName: 'Resource Type',
+				displayName: 'Type',
 				name: 'resource_type',
 				type: 'string',
 				default: 'resource',
-				required: true,
 				description: 'The type of the resource',
+				required: true,
 			},
 			{
-				displayName: 'Resource ID',
+				displayName: 'ID',
 				name: 'resource_id',
 				type: 'string',
 				default: 'resource',
-				required: true,
 				description: 'The type of the resource',
+				required: true,
 			},
 			{
 				displayName: 'Attributes',
 				name: 'resource_attributes',
-				placeholder: 'Add attributes as json',
 				type: 'json',
-				default: ''
+				placeholder: 'Add attributes as json',
+				default: '',
+				description: 'The attributes of the resource',
+				required: true
 			}
 		],
 	};
