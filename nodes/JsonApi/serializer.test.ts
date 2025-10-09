@@ -1,4 +1,4 @@
-import { serialize } from './serializer';
+import { serialize, buildPayload, type ResourceInput  } from './serializer';
 
 describe('serialize', () => {
 	it('should serialize a resource with all attributes', () => {
@@ -32,32 +32,110 @@ describe('serialize', () => {
 			attributes: {}
 		});
 	});
+});
 
-	it('should serialize a resource with various data types in attributes', () => {
-		const result = serialize(
-			'organization',
-			'3',
-			{
-				name: 'Puma',
-				country: 'Germany',
-				founded: 1948,
-				active: true,
-				regions: ['Europe', 'Asia'],
-				metadata: { employees: 16000 }
-			}
-		);
+describe('buildPayload', () => {
+	describe('object response type', () => {
+		it('should build payload for single resource', () => {
+			const resources: ResourceInput[] = [
+				{
+					resource_type: 'organization',
+					resource_id: '42',
+					attributes: {
+						name: 'Nike',
+						country: 'Romania',
+						region: 'Sibiu'
+					}
+				}
+			];
 
-		expect(result).toEqual({
-			id: '3',
-			type: 'organization',
-			attributes: {
-				name: 'Puma',
-				country: 'Germany',
-				founded: 1948,
-				active: true,
-				regions: ['Europe', 'Asia'],
-				metadata: { employees: 16000 }
-			}
+			const result = buildPayload('object', resources);
+
+			expect(result).toEqual({
+				data: {
+					id: '42',
+					type: 'organization',
+					attributes: {
+						name: 'Nike',
+						country: 'Romania',
+						region: 'Sibiu'
+					}
+				}
+			});
+		});
+
+		it('should build payload with empty attributes', () => {
+			const resources: ResourceInput[] = [
+				{
+					resource_type: 'organization',
+					resource_id: '1',
+					attributes: {}
+				}
+			];
+
+			const result = buildPayload('object', resources);
+
+			expect(result).toEqual({
+				data: {
+					id: '1',
+					type: 'organization',
+					attributes: {}
+				}
+			});
+		});
+	});
+
+	describe('array response type', () => {
+		it('should build payload for multiple resources', () => {
+			const resources: ResourceInput[] = [
+				{
+					resource_type: 'organization',
+					resource_id: '1',
+					attributes: { name: 'Nike', country: 'USA' }
+				},
+				{
+					resource_type: 'organization',
+					resource_id: '2',
+					attributes: { name: 'Adidas', country: 'Germany' }
+				},
+				{
+					resource_type: 'organization',
+					resource_id: '3',
+					attributes: { name: 'Puma', country: 'Germany' }
+				}
+			];
+
+			const result = buildPayload('array', resources);
+
+			expect(result).toEqual({
+				data: [
+					{
+						id: '1',
+						type: 'organization',
+						attributes: { name: 'Nike', country: 'USA' }
+					},
+					{
+						id: '2',
+						type: 'organization',
+						attributes: { name: 'Adidas', country: 'Germany' }
+					},
+					{
+						id: '3',
+						type: 'organization',
+						attributes: { name: 'Puma', country: 'Germany' }
+					}
+				]
+			});
+		});
+
+		it('should handle empty array', () => {
+			const resources: ResourceInput[] = [];
+
+			const result = buildPayload('array', resources);
+
+			expect(result).toEqual({
+				data: []
+			});
 		});
 	});
 });

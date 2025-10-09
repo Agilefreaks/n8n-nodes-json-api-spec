@@ -1,4 +1,4 @@
-import { type IExecuteFunctions, NodeOperationError, type INode } from 'n8n-workflow';
+import { NodeOperationError, type INode } from 'n8n-workflow';
 
 export interface JsonApiResource {
 	id: string;
@@ -6,9 +6,12 @@ export interface JsonApiResource {
 	attributes: unknown;
 }
 
-/**
- * Serializes a single object to JSON API format
- */
+export interface ResourceInput {
+	resource_type: string;
+	resource_id: string;
+	attributes: unknown;
+}
+
 export function serialize(
 	resource_type: string,
 	resource_id: string,
@@ -29,14 +32,18 @@ export function parseAttributes(node: INode, attributes: string): unknown {
 	}
 }
 
-export function serializeFromNode(
-	context: IExecuteFunctions,
-	itemIndex: number
-): JsonApiResource {
-	const resource_type = context.getNodeParameter('resource_type', itemIndex) as string;
-	const resource_id = context.getNodeParameter('resource_id', itemIndex) as string;
-	const resource_attributes = context.getNodeParameter('resource_attributes', itemIndex) as string;
-
-	const attributes = parseAttributes(context.getNode(), resource_attributes);
-	return serialize(resource_type, resource_id, attributes);
+export function buildPayload(
+	response_type: 'object' | 'array',
+	resources: ResourceInput[]
+): { data: JsonApiResource | JsonApiResource[] } {
+	if (response_type === 'object') {
+		const resource = resources[0];
+		const data = serialize(resource.resource_type, resource.resource_id, resource.attributes);
+		return { data };
+	} else {
+		const data = resources.map(resource =>
+			serialize(resource.resource_type, resource.resource_id, resource.attributes)
+		);
+		return { data };
+	}
 }

@@ -4,10 +4,9 @@ import {
 	type IExecuteFunctions,
 	type INodeExecutionData,
 	type INodeType,
-	type INodeTypeDescription,
-	NodeOperationError
+	type INodeTypeDescription
 } from 'n8n-workflow';
-import { serializeFromNode } from './serializer';
+import { buildPayload, parseAttributes, type ResourceInput } from './serializer';
 
 export class Serializer implements INodeType {
 	description: INodeTypeDescription = {
@@ -68,21 +67,31 @@ export class Serializer implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const response_type = this.getNodeParameter('response_type', 0);
+		const response_type = this.getNodeParameter('response_type', 0) as 'object' | 'array';
 
-		let payload: { data: unknown };
-		let data;
+		const resources: ResourceInput[] = [];
 
 		if (response_type === 'object') {
-			data = serializeFromNode(this, 0);
-		} else if (response_type === 'array') {
-			const items = this.getInputData();
-			data = items.map((_, i) => serializeFromNode(this, i));
+			const resource_type = this.getNodeParameter('resource_type', 0) as string;
+			const resource_id = this.getNodeParameter('resource_id', 0) as string;
+			const resource_attributes = this.getNodeParameter('resource_attributes', 0) as string;
+			const attributes = parseAttributes(this.getNode(), resource_attributes);
+
+			resources.push({ resource_type, resource_id, attributes });
 		} else {
-			throw new NodeOperationError(this.getNode(), 'Invalid response type');
+			const items = this.getInputData();
+			for (let i = 0; i < items.length; i++) {
+				const resource_type = this.getNodeParameter('resource_type', i) as string;
+				const resource_id = this.getNodeParameter('resource_id', i) as string;
+				const resource_attributes = this.getNodeParameter('resource_attributes', i) as string;
+				const attributes = parseAttributes(this.getNode(), resource_attributes);
+
+				resources.push({ resource_type, resource_id, attributes });
+			}
 		}
 
-		payload = { data };
+		const payload = buildPayload(response_type, resources);
+
 		return [this.helpers.returnJsonArray(payload as any)];
 	}
 }
