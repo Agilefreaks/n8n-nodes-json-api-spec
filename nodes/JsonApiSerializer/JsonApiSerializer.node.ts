@@ -1,5 +1,3 @@
-/* eslint-disable n8n-nodes-base/node-filename-against-convention */
-/* eslint-disable n8n-nodes-base/node-dirname-against-convention */
 import {
 	type IExecuteFunctions,
 	type INodeExecutionData,
@@ -8,7 +6,7 @@ import {
 } from 'n8n-workflow';
 import { buildPayload, parseAttributes, type ResourceInput } from './serializer';
 
-export class Serializer implements INodeType {
+export class JsonApiSerializer implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Json Api Serializer',
 		name: 'jsonApiSerializer',
