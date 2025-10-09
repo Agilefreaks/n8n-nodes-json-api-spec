@@ -1,48 +1,165 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# n8n-nodes-json-api-spec
 
-# n8n-nodes-starter
+This is an n8n community node. It lets you serialize data to JSON API Specification format in your n8n workflows.
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](https://n8n.io). It includes the node linter and other dependencies.
+[JSON API](https://jsonapi.org/) is a specification for building APIs in JSON. This node helps you transform your data into JSON API compliant format with proper structure including resource type, id, and attributes.
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+[n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-If you would like your node to be available on n8n cloud you can also [submit your node for verification](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/).
+[Installation](#installation)  
+[Operations](#operations)  
+[Compatibility](#compatibility)  
+[Usage](#usage)  
+[Resources](#resources)
+## Installation
 
-## Prerequisites
+Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
-You need the following installed on your development machine:
+## Operations
 
-* [git](https://git-scm.com/downloads)
-* Node.js and npm. Minimum version Node 20. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
-* Install n8n with:
-  ```
-  npm install n8n -g
-  ```
-* Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
+The **JSON API Serializer** node supports the following operations:
 
-## Using this starter
+### Serialize Resource Object
+Serializes a single resource into JSON API format with a `data` object containing:
+- `id` - The resource identifier
+- `type` - The resource type
+- `attributes` - The resource attributes as a JSON object
 
-These are the basic steps for working with the starter. For detailed guidance on creating and publishing nodes, refer to the [documentation](https://docs.n8n.io/integrations/creating-nodes/).
+### Serialize Resources Array
+Serializes multiple resources into JSON API format with a `data` array, where each item contains:
+- `id` - The resource identifier
+- `type` - The resource type
+- `attributes` - The resource attributes as a JSON object
 
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template repository.
-2. Clone your new repo:
-   ```
-   git clone https://github.com/<your organization>/<your-repo-name>.git
-   ```
-3. Run `npm i` to install dependencies.
-4. Open the project in your editor.
-5. Browse the examples in `/nodes` and `/credentials`. Modify the examples, or replace them with your own nodes.
-6. Update the `package.json` to match your details.
-7. Run `npm run lint` to check for errors or `npm run lintfix` to automatically fix errors when possible.
-8. Test your node locally. Refer to [Run your node locally](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/) for guidance.
-9. Replace this README with documentation for your node. Use the [README_TEMPLATE](README_TEMPLATE.md) to get started.
-10. Update the LICENSE file to use your details.
-11. [Publish](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry) your package to npm.
+## Compatibility
 
-## More information
+- Tested against: n8n 1.113.3
 
-Refer to our [documentation on creating nodes](https://docs.n8n.io/integrations/creating-nodes/) for detailed information on building your own nodes.
+## Usage
+
+### Basic Example - Single Resource
+
+**Input parameters:**
+- Response: `Resource Object`
+- Type: `organization`
+- ID: `42`
+- Attributes: `{"name": "Agile Freaks SRL", "country": "Romania", "region": "Sibiu"}`
+
+**Output:**
+```json
+{
+  "data": {
+    "id": "42",
+    "type": "organization",
+    "attributes": {
+      "name": "Agile Freaks SRL",
+      "country": "Romania",
+      "region": "Sibiu"
+    }
+  }
+}
+```
+
+### Multiple Resources Example
+
+**Input parameters:**
+- Response: `Resources Array`
+- Configure the Type, ID, and Attributes for each input item
+
+**Output:**
+```json
+{
+  "data": [
+    {
+      "id": "1",
+      "type": "organization",
+      "attributes": {
+        "name": "Agile Freaks SRL",
+        "country": "USA"
+      }
+    },
+    {
+      "id": "2",
+      "type": "organization",
+      "attributes": {
+        "name": "Agile Freaks SRL",
+        "country": "Germany"
+      }
+    }
+  ]
+}
+```
+
+### Tips
+- The **Attributes** field accepts JSON format - make sure your JSON is valid
+- Use the **Resource Object** response type when you need to serialize a single item
+- Use the **Resources Array** response type when working with multiple items from previous nodes
+- The node follows the [JSON API v1.0 specification](https://jsonapi.org/format/)
+
+## Resources
+
+* [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
+* [JSON API Specification](https://jsonapi.org/)
+* [JSON API Format Documentation](https://jsonapi.org/format/)
+
+## Todos
+- support include and relationships
+
+## Development Setup
+
+1. Clone this repository.
+2. Install node and npm. https://nodejs.org/en/download
+3. Install pnpm
+```bash
+npm i -g pnpm
+```
+4. Install local package
+```bash
+pnpm install
+```
+5. Build n8n
+```bash
+pnpm run build
+```
+6. Run n8n in docker mode
+7. Configure n8n docker container to use this custom node. Add the following volume for n8n-main service
+```yaml
+  volumes:
+    - ~/n8n-nodes-json-api-spec/dist:/home/node/.n8n/custom/node_modules/n8n-nodes-json-api-spec
+```
+
+## Development
+1. Make changes to nodes or credentials
+2. Delete compiled files
+```bash
+rm -rf dist
+```
+3. Build packages and n8n
+```bash
+pnpm run build
+```
+4. Restart n8n (make sure to be in n8n directory)
+```bash
+docker compose restart n8n-main
+```
+
+## Publishing Package on npm
+1. Update version (patch / minor / major)
+```bash
+npm version patch
+```
+
+2. Push version update on git
+```bash
+git push
+```
+
+3. Publish version on npm
+```bash
+npm publish
+```
+
 
 ## License
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+[MIT](LICENSE.md)

@@ -6,7 +6,7 @@ describe('serialize', () => {
 			'organization',
 			'42',
 			{
-				name: 'Nike',
+				name: 'Agile Freaks SRL',
 				country: 'Romania',
 				region: 'Sibiu'
 			}
@@ -16,7 +16,7 @@ describe('serialize', () => {
 			id: '42',
 			type: 'organization',
 			attributes: {
-				name: 'Nike',
+				name: 'Agile Freaks SRL',
 				country: 'Romania',
 				region: 'Sibiu'
 			}
@@ -42,7 +42,7 @@ describe('buildPayload', () => {
 					resource_type: 'organization',
 					resource_id: '42',
 					attributes: {
-						name: 'Nike',
+						name: 'Agile Freaks SRL',
 						country: 'Romania',
 						region: 'Sibiu'
 					}
@@ -56,7 +56,7 @@ describe('buildPayload', () => {
 					id: '42',
 					type: 'organization',
 					attributes: {
-						name: 'Nike',
+						name: 'Agile Freaks SRL',
 						country: 'Romania',
 						region: 'Sibiu'
 					}
@@ -91,17 +91,17 @@ describe('buildPayload', () => {
 				{
 					resource_type: 'organization',
 					resource_id: '1',
-					attributes: { name: 'Nike', country: 'USA' }
+					attributes: { name: 'Agile Freaks SRL', country: 'USA' }
 				},
 				{
 					resource_type: 'organization',
 					resource_id: '2',
-					attributes: { name: 'Adidas', country: 'Germany' }
+					attributes: { name: 'Agile Freaks SRL', country: 'Germany' }
 				},
 				{
 					resource_type: 'organization',
 					resource_id: '3',
-					attributes: { name: 'Puma', country: 'Germany' }
+					attributes: { name: 'Agile Freaks SRL', country: 'Germany' }
 				}
 			];
 
@@ -112,17 +112,17 @@ describe('buildPayload', () => {
 					{
 						id: '1',
 						type: 'organization',
-						attributes: { name: 'Nike', country: 'USA' }
+						attributes: { name: 'Agile Freaks SRL', country: 'USA' }
 					},
 					{
 						id: '2',
 						type: 'organization',
-						attributes: { name: 'Adidas', country: 'Germany' }
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' }
 					},
 					{
 						id: '3',
 						type: 'organization',
-						attributes: { name: 'Puma', country: 'Germany' }
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' }
 					}
 				]
 			});
