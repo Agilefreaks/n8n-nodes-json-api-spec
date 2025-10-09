@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-json-api-spec",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Set of tools to parse/format or serialize/deserialize data for JSON API Specification",
   "keywords": [
     "n8n-community-node-package"
