@@ -3,10 +3,11 @@
 import {
 	type IExecuteFunctions,
 	type INodeExecutionData,
-	type IDataObject,
 	type INodeType,
-	type INodeTypeDescription
+	type INodeTypeDescription,
+	NodeOperationError
 } from 'n8n-workflow';
+import { serialize } from './serializer';
 
 export class Serializer implements INodeType {
 	description: INodeTypeDescription = {
@@ -28,13 +29,13 @@ export class Serializer implements INodeType {
 				type: 'options',
 				options: [
 					{
-						name: "Object",
-						value: "object"
+						name: 'Object',
+						value: 'object',
 					},
 					{
-						name: "Array",
-						value: "array"
-					}
+						name: 'Array',
+						value: 'array',
+					},
 				],
 				default: 'object',
 				required: true,
@@ -57,35 +58,12 @@ export class Serializer implements INodeType {
 				description: 'The type of the resource',
 			},
 			{
-				displayName: 'Attributes',
-				name: 'resource_attributes',
-				placeholder: 'Add Attributes',
-				type: 'fixedCollection',
-				typeOptions: {
-					multipleValues: true,
-				},
-				default: {},
-				options: [
-					{
-						name: 'attribute_values',
-						displayName: 'Attribute',
-						values: [
-							{
-								displayName: 'Name',
-								name: 'attribute_name',
-								type: 'string',
-								default: '',
-							},
-							{
-								displayName: 'Value',
-								name: 'value',
-								type: 'string',
-								default: '',
-							}
-						],
-					},
-				],
-			}
+				displayName: 'JSON Attributes',
+				name: 'json_resource_attributes',
+				placeholder: 'Add attributes as json',
+				type: 'json',
+				default: ''
+			},
 		],
 	};
 
@@ -93,31 +71,28 @@ export class Serializer implements INodeType {
 		const response_type = this.getNodeParameter('response_type', 0);
 		const resource_type = this.getNodeParameter('resource_type', 0);
 		const resource_id = this.getNodeParameter('resource_id', 0);
-		const resource_attributes = this.getNodeParameter('resource_attributes', 0) as IDataObject;
 
-		const attributes: Record<string, unknown> = {};
-		console.log(resource_attributes)
-		// Populate attributes from { attribute_values: [{ attribute_name, attribute_value }] }
-		const attributeValues = (resource_attributes?.attribute_values as IDataObject[] | undefined) ?? [];
-		console.log(attributeValues)
-		for (const entry of attributeValues) {
-			console.log(entry)
-			const attributeName = entry.attribute_name as string | undefined;
-			const attributeValue = entry.value as unknown;
-			if (attributeName) {
-				attributes[attributeName] = attributeValue;
-			}
+		let json_resource_attributes = this.getNodeParameter('json_resource_attributes', 0) as string;
+		try {
+			json_resource_attributes = JSON.parse(json_resource_attributes);
+		} catch (exception) {
+			throw new NodeOperationError(this.getNode(), 'Attributes must be a valid json');
 		}
 
+		let payload = {}
+		let data;
 
-		const data = {
-			id: resource_id,
-			type: resource_type,
-			attributes,
-		};
-
-		// If the user selected array, wrap in an array, else return as object
-		const payload = response_type === 'array' ? [data] : data;
+		if (response_type === 'object') {
+			data = serialize(resource_type as string, resource_id as string, json_resource_attributes);
+			payload = { data: data };
+		}
+		else if (response_type === 'array') {
+			data = serialize(resource_type as string, resource_id as string, json_resource_attributes);
+			payload = { data: [data] }
+		}
+		else {
+			throw new NodeOperationError(this.getNode(), 'Invalid response type');
+		}
 
 		return [this.helpers.returnJsonArray(payload as any)];
 	}
