@@ -31,6 +31,11 @@ Serializes multiple resources into JSON API format with a `data` array, where ea
 - `type` - The resource type
 - `attributes` - The resource attributes as a JSON object
 
+### Pagination Support
+Optionally includes JSON API compliant pagination information with:
+- `meta` - Metadata including page info (current page, page size, total pages) and custom fields
+- `links` - Navigation links (first, prev, next, last) with auto-generated URLs
+
 ## Compatibility
 
 - Tested against: n8n 1.113.3
@@ -90,10 +95,98 @@ Serializes multiple resources into JSON API format with a `data` array, where ea
 }
 ```
 
+### Pagination Example
+
+**Input parameters:**
+- Response: `Resources Array`
+- Enable Pagination: `true`
+- URL: `https://api.example/organizations`
+- Current Page: `1`
+- Page Size: `3`
+- Total Pages: `3000`
+- Query Parameters (Filters): `{"filter": {"name": "freak", "country": "Romania"}}`
+- Custom Metadata Input Mode: `JSON`
+- Custom Meta (JSON): `{"total_organization_count": "9000"}`
+
+**Output:**
+```json
+{
+  "data": [
+    {
+      "id": "1",
+      "type": "organization",
+      "attributes": {
+        "name": "Agile Freaks SRL",
+        "country": "Romania"
+      }
+    },
+    {
+      "id": "2",
+      "type": "organization",
+      "attributes": {
+        "name": "Agile Freaks",
+        "country": "Romania"
+      }
+    },
+    {
+      "id": "3",
+      "type": "organization",
+      "attributes": {
+        "name": "AgileFreaks",
+        "country": "Romania"
+      }
+      }
+    }
+  ],
+  "meta": {
+    "page": {
+      "current": 1,
+      "size": 3,
+      "total": 9000
+    },
+    "total_organization_count": "9000"
+  },
+  "links": {
+    "first": "https://localhost:5678/webhook/v1/organizations?filter%5Bname%5D=freak&filter%5Bcountry%5D=Romania&page%5Bnumber%5D=1&page%5Bsize%5D=3",
+    "prev": null,
+    "next": "https://localhost:5678/webhook/v1/organizations?filter%5Bname%5D=freak&filter%5Bcountry%5D=Romania&page%5Bnumber%5D=2&page%5Bsize%5D=3",
+    "last": "https://localhost:5678/webhook/v1/organizations?filter%5Bname%5D=cfreak&filter%5Bcountry%5D=Romania&page%5Bnumber%5D=3000&page%5Bsize%5D=3"
+  }
+}
+```
+
+### Custom Metadata Input Modes
+
+The **Custom Metadata** field supports two input modes:
+
+#### JSON Mode
+Enter metadata as a JSON object directly:
+```json
+{"total_organization_count": "9000", "filter_applied": true}
+```
+
+#### Fields Mode
+Add metadata fields individually using name/value pairs:
+- Field Name: `total_organization_count`
+- Field Value: `9000`
+- *(Click "Add Field" to add more)*
+
+Both modes produce the same output in the `meta` section. Use **Fields mode** for simpler cases and **JSON mode** when you need complex nested structures.
+
 ### Tips
 - The **Attributes** field accepts JSON format - make sure your JSON is valid
 - Use the **Resource Object** response type when you need to serialize a single item
 - Use the **Resources Array** response type when working with multiple items from previous nodes
+- Enable **Pagination** to add JSON API compliant pagination metadata and links
+- **Pagination fields** (Current Page, Page Size, Total Pages) are entered as separate numeric fields
+- Use **Query Parameters (Filters)** field to add filters that will be preserved across all pagination links
+  - Example: `{"filter": {"name": "freak", "country": "Romania"}}`
+  - These filters will appear in all pagination links (first, prev, next, last)
+- Pagination links use **URL encoding**
+- The **Custom Metadata** field has two modes:
+  - **Fields mode**: Add metadata using simple name/value pairs (easier for basic cases)
+  - **JSON mode**: Enter metadata as a JSON object (better for complex nested structures)
+- On the first page, `prev` will be `null`; on the last page, `next` will be `null`
 - The node follows the [JSON API v1.0 specification](https://jsonapi.org/format/)
 
 ## Resources
