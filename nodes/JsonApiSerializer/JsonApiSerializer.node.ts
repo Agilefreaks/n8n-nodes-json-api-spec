@@ -218,86 +218,93 @@ export class JsonApiSerializer implements INodeType {
 		],
 	};
 
-	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+		async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const response_type = this.getNodeParameter('response_type', 0) as 'object' | 'array';
-		const enable_pagination = this.getNodeParameter('enable_pagination', 0) as boolean;
 
-		const resources: ResourceInput[] = [];
-
-		if (response_type === 'object') {
-			const resource_type = this.getNodeParameter('resource_type', 0) as string;
-			const resource_id = this.getNodeParameter('resource_id', 0) as string;
-			const resource_attributes = this.getNodeParameter('resource_attributes', 0) as string;
-			const attributes = parseAttributes(this.getNode(), resource_attributes);
-
-			resources.push({ resource_type, resource_id, attributes });
-		} else {
-			const items = this.getInputData();
-			for (let i = 0; i < items.length; i++) {
-				const resource_type = this.getNodeParameter('resource_type', i) as string;
-				const resource_id = this.getNodeParameter('resource_id', i) as string;
-				const resource_attributes = this.getNodeParameter('resource_attributes', i) as string;
-				const attributes = parseAttributes(this.getNode(), resource_attributes);
-
-				resources.push({ resource_type, resource_id, attributes });
-			}
-		}
-
-		let pagination: PaginationInput | undefined;
-
-		if (enable_pagination) {
-			const url = this.getNodeParameter('pagination_url', 0) as string;
-			const currentPage = this.getNodeParameter('pagination_current_page', 0) as number;
-			const pageSize = this.getNodeParameter('pagination_page_size', 0) as number;
-			const totalPages = this.getNodeParameter('pagination_total_pages', 0) as number;
-			const queryParamsString = this.getNodeParameter('pagination_query_params', 0) as string;
-			const metaInputMode = this.getNodeParameter('pagination_meta_input_mode', 0) as string;
-
-			let filterParams: Record<string, unknown> = {};
-			if (queryParamsString && queryParamsString.trim()) {
-				filterParams = parseAttributes(this.getNode(), queryParamsString) as Record<string, unknown>;
-			}
-
-			const queryParams = {
-				...filterParams,
-				page: {
-					number: currentPage,
-					size: pageSize
-				}
-			};
-
-			let customMeta: Record<string, unknown> | undefined;
-
-			if (metaInputMode === 'json') {
-				const customMetaString = this.getNodeParameter('pagination_custom_meta_json', 0) as string;
-				if (customMetaString) {
-					customMeta = parseAttributes(this.getNode(), customMetaString) as Record<string, unknown>;
-				}
-			} else {
-				const fieldsData = this.getNodeParameter('pagination_custom_meta_fields', 0) as {
-					field?: Array<{ name: string; value: string }>;
-				};
-
-				if (fieldsData?.field && fieldsData.field.length > 0) {
-					customMeta = {};
-					for (const fieldItem of fieldsData.field) {
-						if (fieldItem.name) {
-							customMeta[fieldItem.name] = fieldItem.value;
-						}
-					}
-				}
-			}
-
-			pagination = {
-				url,
-				queryParams,
-				totalPages,
-				customMeta,
-			};
-		}
-
+		const resources = JsonApiSerializer.buildResources(this, response_type);
+		const pagination = JsonApiSerializer.buildPaginationInput(this);
 		const payload = buildPayload(response_type, resources, pagination);
 
 		return [this.helpers.returnJsonArray(payload as any)];
+	}
+
+	private static buildResources(context: IExecuteFunctions, responseType: 'object' | 'array'): ResourceInput[] {
+		if (responseType === 'object') {
+			return [JsonApiSerializer.buildSingleResource(context, 0)];
+		}
+
+		const items = context.getInputData();
+		return items.map((_, i) => JsonApiSerializer.buildSingleResource(context, i));
+	}
+
+	private static buildSingleResource(context: IExecuteFunctions, index: number): ResourceInput {
+		const resource_type = context.getNodeParameter('resource_type', index) as string;
+		const resource_id = context.getNodeParameter('resource_id', index) as string;
+		const resource_attributes = context.getNodeParameter('resource_attributes', index) as string;
+		const attributes = parseAttributes(context.getNode(), resource_attributes);
+
+		return { resource_type, resource_id, attributes };
+	}
+
+	private static buildPaginationInput(context: IExecuteFunctions): PaginationInput | undefined {
+		if (!context.getNodeParameter('enable_pagination', 0)) {
+			return undefined;
+		}
+
+		const url = context.getNodeParameter('pagination_url', 0) as string;
+		const currentPage = context.getNodeParameter('pagination_current_page', 0) as number;
+		const pageSize = context.getNodeParameter('pagination_page_size', 0) as number;
+		const totalPages = context.getNodeParameter('pagination_total_pages', 0) as number;
+
+		const queryParams = {
+			...JsonApiSerializer.parseFilterParams(context),
+			page: { number: currentPage, size: pageSize }
+		};
+
+		return {
+			url,
+			queryParams,
+			totalPages,
+			customMeta: JsonApiSerializer.parseCustomMeta(context),
+		};
+	}
+
+	private static parseFilterParams(context: IExecuteFunctions): Record<string, unknown> {
+		const queryParamsString = context.getNodeParameter('pagination_query_params', 0) as string;
+
+		if (!queryParamsString || !queryParamsString.trim()) {
+			return {};
+		}
+
+		return parseAttributes(context.getNode(), queryParamsString) as Record<string, unknown>;
+	}
+
+	private static parseCustomMeta(context: IExecuteFunctions): Record<string, unknown> | undefined {
+		const metaInputMode = context.getNodeParameter('pagination_meta_input_mode', 0) as string;
+
+		if (metaInputMode === 'json') {
+			return JsonApiSerializer.parseCustomMetaJson(context);
+		}
+		return JsonApiSerializer.parseCustomMetaFields(context);
+	}
+
+	private static parseCustomMetaJson(context: IExecuteFunctions): Record<string, unknown> | undefined {
+		const customMetaString = context.getNodeParameter('pagination_custom_meta_json', 0) as string;
+		return customMetaString ? parseAttributes(context.getNode(), customMetaString) as Record<string, unknown> : undefined;
+	}
+
+	private static parseCustomMetaFields(context: IExecuteFunctions): Record<string, unknown> | undefined {
+		const fieldsData = context.getNodeParameter('pagination_custom_meta_fields', 0) as {
+			field?: Array<{ name: string; value: string }>;
+		};
+
+		if (!fieldsData?.field?.length) {
+			return undefined;
+		}
+
+		return fieldsData.field.reduce((acc, { name, value }) => {
+			if (name) acc[name] = value;
+			return acc;
+		}, {} as Record<string, unknown>);
 	}
 }

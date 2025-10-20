@@ -145,12 +145,12 @@ describe('buildPayload', () => {
 				{
 					resource_type: 'organization',
 					resource_id: '1',
-					attributes: { name: 'Org 1' }
+					attributes: { name: 'Agile Freaks SRL', country: 'USA' }
 				},
 				{
 					resource_type: 'organization',
 					resource_id: '2',
-					attributes: { name: 'Org 2' }
+					attributes: { name: 'Agile Freaks SRL', country: 'Germany' }
 				}
 			];
 
@@ -172,12 +172,12 @@ describe('buildPayload', () => {
 					{
 						id: '1',
 						type: 'organization',
-						attributes: { name: 'Org 1' }
+						attributes: { name: 'Agile Freaks SRL', country: 'USA' }
 					},
 					{
 						id: '2',
 						type: 'organization',
-						attributes: { name: 'Org 2' }
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' }
 					}
 				],
 				meta: {
@@ -200,8 +200,12 @@ describe('buildPayload', () => {
 			const resources: ResourceInput[] = [
 				{
 					resource_type: 'organization',
-					resource_id: '1',
-					attributes: { name: 'Org 1' }
+					resource_id: '42',
+					attributes: {
+						name: 'Agile Freaks SRL',
+						country: 'Romania',
+						region: 'Sibiu'
+					}
 				}
 			];
 
@@ -215,7 +219,7 @@ describe('buildPayload', () => {
 				},
 				totalPages: 100,
 				customMeta: {
-					total_organization_count: '62334',
+					total_organization_count: '9000',
 					filter_applied: true
 				}
 			};
@@ -228,7 +232,7 @@ describe('buildPayload', () => {
 					size: 3,
 					total: 100
 				},
-				total_organization_count: '62334',
+				total_organization_count: '9000',
 				filter_applied: true
 			});
 		});
@@ -238,7 +242,7 @@ describe('buildPayload', () => {
 				{
 					resource_type: 'organization',
 					resource_id: '1',
-					attributes: { name: 'Org 1' }
+					attributes: { name: 'Agile Freaks SRL', country: 'USA' }
 				}
 			];
 
@@ -259,7 +263,6 @@ describe('buildPayload', () => {
 
 			const result = buildPayload('array', resources, pagination);
 
-			// All links should contain the filters
 			expect(result.links?.first).toContain('filter%5Bname%5D=cons');
 			expect(result.links?.first).toContain('filter%5Bcountry%5D=France');
 			expect(result.links?.next).toContain('filter%5Bname%5D=cons');
@@ -393,7 +396,7 @@ describe('buildPaginationMeta', () => {
 			{ page: { number: 1, size: 3 } },
 			20778,
 			{
-				total_organization_count: '62334',
+				total_organization_count: '9000',
 				filter_applied: true
 			}
 		);
@@ -404,7 +407,7 @@ describe('buildPaginationMeta', () => {
 				size: 3,
 				total: 20778
 			},
-			total_organization_count: '62334',
+			total_organization_count: '9000',
 			filter_applied: true
 		});
 	});
@@ -414,21 +417,6 @@ describe('buildPaginationMeta', () => {
 			{ page: { number: 1, size: 10 } },
 			50,
 			{}
-		);
-
-		expect(result).toEqual({
-			page: {
-				current: 1,
-				size: 10,
-				total: 50
-			}
-		});
-	});
-
-	it('should build meta with explicit page values', () => {
-		const result = buildPaginationMeta(
-			{ page: { number: 1, size: 10 } },
-			50
 		);
 
 		expect(result).toEqual({
