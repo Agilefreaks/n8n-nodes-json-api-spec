@@ -4,27 +4,16 @@ import { Resource } from './Types';
 export function parseResource(context: IExecuteFunctions, index: number): Resource {
 	const type = context.getNodeParameter('resource_type', index) as string;
 	const id = context.getNodeParameter('resource_id', index) as string;
-	const resource_attributes = context.getNodeParameter('resource_attributes', index) as string;
-	const attributes = parseAttributes(context.getNode(), resource_attributes);
+	const resourceAttributes = context.getNodeParameter('resource_attributes', index) as string;
+	const attributes = parseAttributes(context.getNode(), resourceAttributes);
+	const relationships = parseRelationships(context);
 
-	const raw_included = context.getNodeParameter('included', 0) as any;
-	const has_relationships = raw_included.resources?.length > 0;
-	var relationships = [];
-	if (has_relationships) {
-		relationships = raw_included.resources?.map((included_resource: any) => {
-			const type = included_resource.type;
-			const attributes = parseAttributes(context.getNode(), included_resource.attributes);
-			const id = attributes.id;
-			delete attributes.id;
+	const resource: Resource = { id, type, attributes };
 
-			return { id, type, attributes }
-		});
-	}
-
-	const resource = { id, type, attributes } as Resource;
-	if (has_relationships) {
+	if (relationships.length > 0) {
 		resource.relationships = relationships;
 	}
+
 	return resource;
 }
 
@@ -34,4 +23,20 @@ export function parseAttributes(node: INode, attributes: string): any {
 	} catch (exception) {
 		throw new NodeOperationError(node, 'Attributes must be a valid json');
 	}
+}
+
+function parseRelationships(context: IExecuteFunctions): Resource[] {
+	const rawIncluded = context.getNodeParameter('included', 0) as any;
+	if (!rawIncluded.resources?.length) {
+		return [];
+	}
+
+	return rawIncluded.resources.map((includedResource: any) => {
+		const type = includedResource.type;
+		const attributes = parseAttributes(context.getNode(), includedResource.attributes);
+		const id = attributes.id;
+		delete attributes.id;
+
+		return { id, type, attributes };
+	});
 }
