@@ -7,7 +7,21 @@ export function parseResource(context: IExecuteFunctions, index: number): Resour
 	const resource_attributes = context.getNodeParameter('resource_attributes', index) as string;
 	const attributes = parseAttributes(context.getNode(), resource_attributes);
 
-	return { id, type, attributes };
+	const raw_included_resources = context.getNodeParameter('included_resources', 0) as any;
+	const has_relationships = raw_included_resources.included_resource?.length > 0;
+	var relationships = [];
+	if (has_relationships) {
+		relationships = raw_included_resources.included_resource?.map((included_resource: any) => {
+			const type = included_resource.type;
+			const attributes = parseAttributes(context.getNode(), included_resource.attributes);
+			const id = attributes.id;
+			delete attributes.id;
+
+			return { id, type, attributes }
+		});
+	}
+
+	return { id, type, attributes, relationships };
 }
 
 export function parseAttributes(node: INode, attributes: string): any {

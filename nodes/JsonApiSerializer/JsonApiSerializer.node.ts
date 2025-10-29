@@ -67,7 +67,7 @@ export class JsonApiSerializer implements INodeType {
 			},
 			{
 				displayName: 'Include Resources',
-				name: 'include_resources',
+				name: 'included_resources',
 				type: 'fixedCollection',
 				typeOptions: {
 					multipleValues: true,
@@ -78,19 +78,19 @@ export class JsonApiSerializer implements INodeType {
 				options: [
 					{
 						displayName: 'Resource',
-						name: 'include_resource',
+						name: 'included_resource',
 						values: [
 							{
-								displayName: 'Include Resource Name',
-								name: 'include_resource_name',
+								displayName: 'Included Resource Type',
+								name: 'type',
 								type: 'string',
 								default: '',
 								description: 'Name of the included resource',
 								required: true
 							},
 							{
-								displayName: 'Include Resource Attributes',
-								name: 'include_resource_attributes',
+								displayName: 'Included Resource Attributes',
+								name: 'attributes',
 								type: 'json',
 								default: '',
 								description: 'Attributes of the included resource',
@@ -105,6 +105,9 @@ export class JsonApiSerializer implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const response_type = this.getNodeParameter('response_type', 0) as 'object' | 'array';
+		const raw_included_resources = this.getNodeParameter('included_resources', 0) as any;
+		const has_relationships = raw_included_resources.included_resource?.length > 0;
+
 		const resources: Resource[] = [];
 
 		if (response_type === 'object') {
@@ -121,7 +124,7 @@ export class JsonApiSerializer implements INodeType {
 			}
 		}
 
-		const response = new JsonApiResponseBuilder(response_type, resources).buildResponse();
+		const response = new JsonApiResponseBuilder(response_type, resources, has_relationships).buildResponse();
 
 		return [this.helpers.returnJsonArray(response as any)];
 	}
