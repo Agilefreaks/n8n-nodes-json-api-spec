@@ -1,9 +1,3 @@
-export interface ResourceInput {
-	resource_type: string;
-	resource_id: string;
-	attributes: any;
-}
-
 export interface Resource {
 	id: string;
 	type: string;
@@ -21,11 +15,6 @@ export interface JsonApiResource {
 	type: string;
 	attributes: any;
 	relationships?: any;
-}
-
-export interface JsonApiResourceRelationship {
-	id: string;
-	type: string;
 }
 
 export enum ResponseType {
