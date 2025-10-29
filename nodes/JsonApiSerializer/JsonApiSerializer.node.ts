@@ -86,7 +86,7 @@ export class JsonApiSerializer implements INodeType {
 								type: 'string',
 								default: '',
 								description: 'Name of the included resource',
-								required: true
+								required: true,
 							},
 							{
 								displayName: 'Attributes',
@@ -94,13 +94,13 @@ export class JsonApiSerializer implements INodeType {
 								type: 'json',
 								default: '',
 								description: 'Attributes of the included resource',
-								required: true
+								required: true,
 							},
 						],
 					},
 				],
-				}
-		]
+			},
+		],
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {

@@ -2,8 +2,7 @@ import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
 import { ResponseType } from './Types';
 
 describe('.buildResponse', () => {
-
-	describe ('with object type', () => {
+	describe('with object type', () => {
 		it('returns the resource object with all attributes', () => {
 			const resource = {
 				id: '42',
@@ -126,7 +125,7 @@ describe('.buildResponse', () => {
 							owner: {
 								id: '42',
 								type: 'owner',
-							}
+							},
 						},
 					},
 					included: [
@@ -143,14 +142,14 @@ describe('.buildResponse', () => {
 							attributes: {
 								name: 'Boss',
 							},
-						}
+						},
 					],
 				});
 			});
 		});
 	});
 
-	describe ('with array type', () => {
+	describe('with array type', () => {
 		it('returns resource array with all their attributes', () => {
 			const resources = [
 				{
@@ -208,7 +207,7 @@ describe('.buildResponse', () => {
 									name: 'Technology',
 								},
 							},
-						]
+						],
 					},
 					{
 						id: '2',
@@ -222,7 +221,7 @@ describe('.buildResponse', () => {
 									name: 'Software',
 								},
 							},
-						]
+						],
 					},
 					{
 						id: '3',
@@ -236,7 +235,7 @@ describe('.buildResponse', () => {
 									name: 'Food Industry',
 								},
 							},
-						]
+						],
 					},
 				];
 
@@ -306,7 +305,6 @@ describe('.buildResponse', () => {
 		});
 
 		describe('with resources having the same relationship', () => {
-
 			it('returns the resource relationship and included', () => {
 				const resources = [
 					{
@@ -321,7 +319,7 @@ describe('.buildResponse', () => {
 									name: 'Technology',
 								},
 							},
-						]
+						],
 					},
 					{
 						id: '2',
@@ -335,7 +333,7 @@ describe('.buildResponse', () => {
 									name: 'Technology',
 								},
 							},
-						]
+						],
 					},
 					{
 						id: '3',
@@ -349,7 +347,7 @@ describe('.buildResponse', () => {
 									name: 'Technology',
 								},
 							},
-						]
+						],
 					},
 				];
 
@@ -402,10 +400,9 @@ describe('.buildResponse', () => {
 					],
 				});
 			});
-		})
+		});
 
 		describe('with resources having the multiple relationships', () => {
-
 			it('returns the resource relationship and included', () => {
 				const resources = [
 					{
@@ -427,7 +424,7 @@ describe('.buildResponse', () => {
 									name: 'Boss',
 								},
 							},
-						]
+						],
 					},
 					{
 						id: '2',
@@ -448,7 +445,7 @@ describe('.buildResponse', () => {
 									name: 'Boss',
 								},
 							},
-						]
+						],
 					},
 					{
 						id: '3',
@@ -469,7 +466,7 @@ describe('.buildResponse', () => {
 									name: 'Boss',
 								},
 							},
-						]
+						],
 					},
 				];
 
@@ -489,7 +486,7 @@ describe('.buildResponse', () => {
 								owner: {
 									id: '1',
 									type: 'owner',
-								}
+								},
 							},
 						},
 						{
@@ -504,7 +501,7 @@ describe('.buildResponse', () => {
 								owner: {
 									id: '1',
 									type: 'owner',
-								}
+								},
 							},
 						},
 						{
@@ -519,7 +516,7 @@ describe('.buildResponse', () => {
 								owner: {
 									id: '1',
 									type: 'owner',
-								}
+								},
 							},
 						},
 					],
@@ -541,6 +538,6 @@ describe('.buildResponse', () => {
 					],
 				});
 			});
-		})
+		});
 	});
 });
