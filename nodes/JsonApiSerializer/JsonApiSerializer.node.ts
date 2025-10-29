@@ -2,11 +2,11 @@ import {
 	type IExecuteFunctions,
 	type INodeExecutionData,
 	type INodeType,
-	type INodeTypeDescription
+	type INodeTypeDescription,
 } from 'n8n-workflow';
-import { parseAttributes } from './serializer';
 import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
-import { JsonApiResource } from './Types';
+import { Resource } from './Types';
+import { parseResource } from './Helpers';
 
 export class JsonApiSerializer implements INodeType {
 	description: INodeTypeDescription = {
@@ -105,29 +105,19 @@ export class JsonApiSerializer implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const response_type = this.getNodeParameter('response_type', 0) as 'object' | 'array';
-
-		const resources: JsonApiResource[] = [];
+		const resources: Resource[] = [];
 
 		if (response_type === 'object') {
-			const resource_type = this.getNodeParameter('resource_type', 0) as string;
-			const resource_id = this.getNodeParameter('resource_id', 0) as string;
-			const resource_attributes = this.getNodeParameter('resource_attributes', 0) as string;
+			const resource = parseResource(this, 0);
 
-			const attributes = parseAttributes(this.getNode(), resource_attributes);
-
-			// Transform include_resources into ResourceInput array
-			resources.push({ id: resource_id, type: resource_type, attributes });
+			resources.push(resource);
 		} else {
 			const items = this.getInputData();
 
 			for (let i = 0; i < items.length; i++) {
-				const resource_type = this.getNodeParameter('resource_type', i) as string;
-				const resource_id = this.getNodeParameter('resource_id', i) as string;
-				const resource_attributes = this.getNodeParameter('resource_attributes', i) as string;
+				const resource = parseResource(this, i);
 
-				const attributes = parseAttributes(this.getNode(), resource_attributes);
-
-				resources.push({ id: resource_id, type: resource_type, attributes });
+				resources.push(resource);
 			}
 		}
 
