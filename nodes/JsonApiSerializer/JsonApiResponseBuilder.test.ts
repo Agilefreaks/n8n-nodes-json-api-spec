@@ -78,6 +78,75 @@ describe('.buildResponse', () => {
 				});
 			});
 		});
+
+		describe('with resource having multiple relationships', () => {
+			it('returns the resource relationship and included', () => {
+				const resource = {
+					id: '42',
+					type: 'organization',
+					attributes: {
+						name: 'Agile Freaks SRL',
+						country: 'Romania',
+						region: 'Sibiu',
+					},
+					relationships: [
+						{
+							id: '42',
+							type: 'sector',
+							attributes: {
+								name: 'Technology',
+							},
+						},
+						{
+							id: '42',
+							type: 'owner',
+							attributes: {
+								name: 'Boss',
+							},
+						},
+					],
+				};
+				const builder = new JsonApiResponseBuilder('object', [resource], true);
+
+				expect(builder.buildResponse()).toEqual({
+					data: {
+						id: '42',
+						type: 'organization',
+						attributes: {
+							name: 'Agile Freaks SRL',
+							country: 'Romania',
+							region: 'Sibiu',
+						},
+						relationships: {
+							sector: {
+								id: '42',
+								type: 'sector',
+							},
+							owner: {
+								id: '42',
+								type: 'owner',
+							}
+						},
+					},
+					included: [
+						{
+							id: '42',
+							type: 'sector',
+							attributes: {
+								name: 'Technology',
+							},
+						},
+						{
+							id: '42',
+							type: 'owner',
+							attributes: {
+								name: 'Boss',
+							},
+						}
+					],
+				});
+			});
+		});
 	});
 
 	describe ('with array type', () => {
@@ -327,6 +396,145 @@ describe('.buildResponse', () => {
 							type: 'sector',
 							attributes: {
 								name: 'Technology',
+							},
+						},
+					],
+				});
+			});
+		})
+
+		describe('with resources having the multiple relationships', () => {
+
+			it('returns the resource relationship and included', () => {
+				const resources = [
+					{
+						id: '1',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
+						relationships: [
+							{
+								id: '1',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+							{
+								id: '1',
+								type: 'owner',
+								attributes: {
+									name: 'Boss',
+								},
+							},
+						]
+					},
+					{
+						id: '2',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+						relationships: [
+							{
+								id: '1',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+							{
+								id: '1',
+								type: 'owner',
+								attributes: {
+									name: 'Boss',
+								},
+							},
+						]
+					},
+					{
+						id: '3',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+						relationships: [
+							{
+								id: '1',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+							{
+								id: '1',
+								type: 'owner',
+								attributes: {
+									name: 'Boss',
+								},
+							},
+						]
+					},
+				];
+
+				const builder = new JsonApiResponseBuilder('array', resources, true);
+
+				expect(builder.buildResponse()).toEqual({
+					data: [
+						{
+							id: '1',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'USA' },
+							relationships: {
+								sector: {
+									id: '1',
+									type: 'sector',
+								},
+								owner: {
+									id: '1',
+									type: 'owner',
+								}
+							},
+						},
+						{
+							id: '2',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+							relationships: {
+								sector: {
+									id: '1',
+									type: 'sector',
+								},
+								owner: {
+									id: '1',
+									type: 'owner',
+								}
+							},
+						},
+						{
+							id: '3',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+							relationships: {
+								sector: {
+									id: '1',
+									type: 'sector',
+								},
+								owner: {
+									id: '1',
+									type: 'owner',
+								}
+							},
+						},
+					],
+					included: [
+						{
+							id: '1',
+							type: 'sector',
+							attributes: {
+								name: 'Technology',
+							},
+						},
+						{
+							id: '1',
+							type: 'owner',
+							attributes: {
+								name: 'Boss',
 							},
 						},
 					],

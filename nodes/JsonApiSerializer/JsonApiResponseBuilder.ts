@@ -39,7 +39,7 @@ export class JsonApiResponseBuilder {
 					jsonApiResource.relationships = {};
 					resource.relationships?.map((relationship: Resource) => {
 						jsonApiResource.relationships[relationship.type] = { id: relationship.id, type: relationship.type };
-						if(!response.included?.some(resource => resource.id === relationship.id)) {
+						if(!response.included?.some(resource => resource.id === relationship.id && resource.type === relationship.type)) {
 							response.included?.push(relationship)
 						}
 					});
