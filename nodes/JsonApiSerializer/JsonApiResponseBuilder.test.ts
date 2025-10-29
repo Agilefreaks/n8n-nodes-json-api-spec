@@ -1,4 +1,5 @@
 import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
+import { ResponseType } from './Types';
 
 describe('.buildResponse', () => {
 
@@ -13,7 +14,7 @@ describe('.buildResponse', () => {
 					region: 'Sibiu',
 				},
 			};
-			const builder = new JsonApiResponseBuilder('object', [resource]);
+			const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource]);
 
 			expect(builder.buildResponse()).toEqual({
 				data: {
@@ -48,7 +49,7 @@ describe('.buildResponse', () => {
 						},
 					],
 				};
-				const builder = new JsonApiResponseBuilder('object', [resource], true);
+				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true);
 
 				expect(builder.buildResponse()).toEqual({
 					data: {
@@ -106,7 +107,7 @@ describe('.buildResponse', () => {
 						},
 					],
 				};
-				const builder = new JsonApiResponseBuilder('object', [resource], true);
+				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true);
 
 				expect(builder.buildResponse()).toEqual({
 					data: {
@@ -169,7 +170,7 @@ describe('.buildResponse', () => {
 				},
 			];
 
-			const builder = new JsonApiResponseBuilder('array', resources);
+			const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources);
 
 			expect(builder.buildResponse()).toEqual({
 				data: [
@@ -239,7 +240,7 @@ describe('.buildResponse', () => {
 					},
 				];
 
-				const builder = new JsonApiResponseBuilder('array', resources, true);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true);
 
 				expect(builder.buildResponse()).toEqual({
 					data: [
@@ -352,7 +353,7 @@ describe('.buildResponse', () => {
 					},
 				];
 
-				const builder = new JsonApiResponseBuilder('array', resources, true);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true);
 
 				expect(builder.buildResponse()).toEqual({
 					data: [
@@ -472,7 +473,7 @@ describe('.buildResponse', () => {
 					},
 				];
 
-				const builder = new JsonApiResponseBuilder('array', resources, true);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true);
 
 				expect(builder.buildResponse()).toEqual({
 					data: [

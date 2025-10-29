@@ -27,3 +27,8 @@ export interface JsonApiResourceRelationship {
 	id: string;
 	type: string;
 }
+
+export enum ResponseType {
+	OBJECT = 'object',
+  ARRAY = 'array'
+}

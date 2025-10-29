@@ -1,12 +1,12 @@
-import { JsonApiResource, JsonApiResponse, Resource } from './Types';
+import { JsonApiResource, JsonApiResponse, Resource, ResponseType } from './Types';
 
 
 export class JsonApiResponseBuilder {
-	response_type: 'object' | 'array';
+	response_type: ResponseType;
 	resources: Resource[];
 	has_relationships: boolean = false;
 
-	constructor(response_type: 'object' | 'array', resources: Resource[], has_relationships: boolean = false) {
+	constructor(response_type: ResponseType, resources: Resource[], has_relationships: boolean = false) {
 		this.response_type = response_type;
 		this.resources = resources;
 		this.has_relationships = has_relationships;
@@ -15,7 +15,7 @@ export class JsonApiResponseBuilder {
 	buildResponse() : JsonApiResponse {
 		const response: JsonApiResponse = { } as JsonApiResponse;
 
-		if (this.response_type === 'object') {
+		if (this.response_type === ResponseType.OBJECT) {
 			const resource = this.resources[0];
 			const jsonApiResource = { id: resource.id, type: resource.type, attributes: resource.attributes } as JsonApiResource;
 

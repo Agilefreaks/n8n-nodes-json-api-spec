@@ -5,7 +5,7 @@ import {
 	type INodeTypeDescription,
 } from 'n8n-workflow';
 import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
-import { Resource } from './Types';
+import { Resource, ResponseType } from './Types';
 import { parseResource } from './Helpers';
 
 export class JsonApiSerializer implements INodeType {
@@ -29,11 +29,11 @@ export class JsonApiSerializer implements INodeType {
 				options: [
 					{
 						name: 'Resource Object',
-						value: 'object',
+						value: ResponseType.OBJECT,
 					},
 					{
 						name: 'Resources Array',
-						value: 'array',
+						value: ResponseType.ARRAY,
 					},
 				],
 				default: 'object',
@@ -104,13 +104,13 @@ export class JsonApiSerializer implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const response_type = this.getNodeParameter('response_type', 0) as 'object' | 'array';
+		const response_type = this.getNodeParameter('response_type', 0) as ResponseType;
 		const raw_included = this.getNodeParameter('included', 0) as any;
 		const has_relationships = raw_included.resources?.length > 0;
 
 		const resources: Resource[] = [];
 
-		if (response_type === 'object') {
+		if (response_type === ResponseType.OBJECT) {
 			const resource = parseResource(this, 0);
 
 			resources.push(resource);
