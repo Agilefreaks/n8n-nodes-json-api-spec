@@ -21,7 +21,11 @@ export function parseResource(context: IExecuteFunctions, index: number): Resour
 		});
 	}
 
-	return { id, type, attributes, relationships };
+	const resource = { id, type, attributes } as Resource;
+	if (has_relationships) {
+		resource.relationships = relationships;
+	}
+	return resource;
 }
 
 export function parseAttributes(node: INode, attributes: string): any {
