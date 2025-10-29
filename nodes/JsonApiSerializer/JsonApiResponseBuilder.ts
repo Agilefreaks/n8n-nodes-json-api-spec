@@ -30,7 +30,8 @@ export class JsonApiResponseBuilder {
 
 			response.data = this.resources.map(resource => {
 				const jsonApiResource = this.createJsonApiResource(resource);
-				this.addRelationshipsToResource(jsonApiResource, resource.relationships, response);
+				this.addRelationshipsToResource(resource.relationships, jsonApiResource);
+				this.addRelationshipsToIncluded(resource.relationships, response);
 				return jsonApiResource;
 			});
 		} else {
@@ -44,7 +45,8 @@ export class JsonApiResponseBuilder {
 
 		if (this.has_relationships) {
 			response.included = [];
-			this.addRelationshipsToResource(jsonApiResource, resource.relationships, response);
+			this.addRelationshipsToResource(resource.relationships, jsonApiResource);
+			this.addRelationshipsToIncluded(resource.relationships, response);
 		}
 
 		response.data = jsonApiResource;
@@ -54,10 +56,16 @@ export class JsonApiResponseBuilder {
 		return { id: resource.id, type: resource.type, attributes: resource.attributes } as JsonApiResource;
 	}
 
-	private addRelationshipsToResource(jsonApiResource: JsonApiResource, relationships: Resource[] = [], response: JsonApiResponse): void {
+	private addRelationshipsToResource(relationships: Resource[] = [], jsonApiResource: JsonApiResource): void {
 		jsonApiResource.relationships = {};
+
 		relationships.forEach((relationship: Resource) => {
 			jsonApiResource.relationships[relationship.type] = { id: relationship.id, type: relationship.type };
+		});
+	}
+
+	private addRelationshipsToIncluded(relationships: Resource[] = [], response: JsonApiResponse): void {
+		relationships.forEach((relationship: Resource) => {
 			if(!response.included?.some(r => r.id === relationship.id && r.type === relationship.type)) {
 				response.included?.push(relationship);
 			}
