@@ -24,16 +24,15 @@ Serializes a single resource into JSON API format with a `data` object containin
 - `id` - The resource identifier
 - `type` - The resource type
 - `attributes` - The resource attributes as a JSON object
-- `relationships` (optional) - Relationships to other resources
-- `included` (optional) - Array of related resources included in the response
 
 ### Serialize Resources Array
 Serializes multiple resources into JSON API format with a `data` array, where each item contains:
 - `id` - The resource identifier
 - `type` - The resource type
 - `attributes` - The resource attributes as a JSON object
-- `relationships` (optional) - Relationships to other resources
-- `included` (optional) - Array of related resources included in the response
+
+### Serialize Resource Object and Array with Relationships
+The optional parameter `included` will add `data.relationshiphs` and `included` keys with the resources provided.
 
 ## Compatibility
 
@@ -101,8 +100,10 @@ Serializes multiple resources into JSON API format with a `data` array, where ea
 - Type: `organization`
 - ID: `6937`
 - Attributes: `{"name": "Test organization", "country": "Kenya", "region": "africa"}`
-- Relationships: `{"sector": {"data": {"type": "sector", "id": "1"}}}`
-- Included: `[{"type": "sector", "id": "1", "attributes": {"name": "Technology", "icb_number": "10101010", "identifier": "technology", "created_at": "2026-01-28T00:00:00Z", "updated_at": "2026-01-30T00:00:00Z"}}]`
+- Include Resources:
+  - Resource:
+    - Type: `sector`
+    - Attributes: `{"id": "1", "name": "Technology"}`
 
 **Output:**
 ```json
@@ -117,23 +118,73 @@ Serializes multiple resources into JSON API format with a `data` array, where ea
     },
     "relationships": {
       "sector": {
-        "data": {
-          "type": "sector",
-          "id": "1"
-        }
+        "id": "1",
+        "type": "sector"
       }
     }
   },
   "included": [
     {
-      "type": "sector",
       "id": "1",
+      "type": "sector",
       "attributes": {
-        "name": "Technology",
-        "icb_number": "10101010",
-        "identifier": "technology",
-        "created_at": "2026-01-28T00:00:00Z",
-        "updated_at": "2026-01-30T00:00:00Z"
+        "name": "Technology"
+      }
+    }
+  ]
+}
+```
+
+### Example with Multiple Included Resources
+
+**Input parameters:**
+- Response: `Resource Object`
+- Type: `organization`
+- ID: `42`
+- Attributes: `{"name": "Agile Freaks SRL", "country": "Romania", "region": "Sibiu"}`
+- Include Resources:
+  - Resource:
+    - Type: `sector`
+    - Attributes: `{"id": "1", "name": "Technology"}`
+  - Resource:
+    - Type: `owner`
+    - Attributes: `{"id": "1", "name": "Boss"}`
+
+**Output:**
+```json
+{
+  "data": {
+    "id": "42",
+    "type": "organization",
+    "attributes": {
+      "name": "Agile Freaks SRL",
+      "country": "Romania",
+      "region": "Sibiu"
+    },
+    "relationships": {
+      "sector": {
+        "id": "1",
+        "type": "sector"
+      },
+      "owner": {
+        "id": "1",
+        "type": "owner"
+      }
+    }
+  },
+  "included": [
+    {
+      "id": "1",
+      "type": "sector",
+      "attributes": {
+        "name": "Technology"
+      }
+    },
+    {
+      "id": "1",
+      "type": "owner",
+      "attributes": {
+        "name": "Boss"
       }
     }
   ]
@@ -142,8 +193,9 @@ Serializes multiple resources into JSON API format with a `data` array, where ea
 
 ### Tips
 - The **Attributes** field accepts JSON format - make sure your JSON is valid
-- The **Relationships** field is optional and should follow the format: `{"relationName": {"data": {"type": "...", "id": "..."}}}`
-- The **Included** field is optional and should be an array of related resources: `[{"type": "...", "id": "...", "attributes": {...}}]`
+- The **Include Resources** field is optional. Add one or more resources that will appear in both the `relationships` and `included` sections
+  - Each included resource requires a **Type**
+  - The **Attributes** must be a JSON object that includes an `id` field - this `id` will be extracted and used for the relationship reference
 - Use the **Resource Object** response type when you need to serialize a single item
 - Use the **Resources Array** response type when working with multiple items from previous nodes
 - The node follows the [JSON API v1.0 specification](https://jsonapi.org/format/)
