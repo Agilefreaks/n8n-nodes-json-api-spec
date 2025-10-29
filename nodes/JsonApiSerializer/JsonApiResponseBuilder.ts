@@ -16,41 +16,51 @@ export class JsonApiResponseBuilder {
 		const response: JsonApiResponse = { } as JsonApiResponse;
 
 		if (this.response_type === ResponseType.OBJECT) {
-			const resource = this.resources[0];
-			const jsonApiResource = { id: resource.id, type: resource.type, attributes: resource.attributes } as JsonApiResource;
-
-			if (this.has_relationships) {
-				response.included = [];
-
-				jsonApiResource.relationships = {};
-				resource.relationships?.forEach((relationship: Resource) => {
-					jsonApiResource.relationships[relationship.type] = { id: relationship.id, type: relationship.type };
-					response.included?.push(relationship);
-				});
-			}
-
-			response.data = jsonApiResource;
+			this.buildObjectResponse(response);
 		} else {
-			if (this.has_relationships) {
-				response.included = [];
-
-				response.data = this.resources.map(resource => {
-					const jsonApiResource = { id: resource.id, type: resource.type, attributes: resource.attributes } as JsonApiResource;
-					jsonApiResource.relationships = {};
-					resource.relationships?.map((relationship: Resource) => {
-						jsonApiResource.relationships[relationship.type] = { id: relationship.id, type: relationship.type };
-						if(!response.included?.some(resource => resource.id === relationship.id && resource.type === relationship.type)) {
-							response.included?.push(relationship)
-						}
-					});
-					return jsonApiResource;
-				});
-			}
-			else {
-				response.data = this.resources;
-			}
+			this.buildArrayResponse(response);
 		}
 
 		return response;
+	}
+
+	private buildArrayResponse(response: JsonApiResponse): void {
+		if (this.has_relationships) {
+			response.included = [];
+
+			response.data = this.resources.map(resource => {
+				const jsonApiResource = this.createJsonApiResource(resource);
+				this.addRelationshipsToResource(jsonApiResource, resource.relationships, response);
+				return jsonApiResource;
+			});
+		} else {
+			response.data = this.resources;
+		}
+	}
+
+	private buildObjectResponse(response: JsonApiResponse): void {
+		const resource = this.resources[0];
+		const jsonApiResource = this.createJsonApiResource(resource);
+
+		if (this.has_relationships) {
+			response.included = [];
+			this.addRelationshipsToResource(jsonApiResource, resource.relationships, response);
+		}
+
+		response.data = jsonApiResource;
+	}
+
+	private createJsonApiResource(resource: Resource): JsonApiResource {
+		return { id: resource.id, type: resource.type, attributes: resource.attributes } as JsonApiResource;
+	}
+
+	private addRelationshipsToResource(jsonApiResource: JsonApiResource, relationships: Resource[] = [], response: JsonApiResponse): void {
+		jsonApiResource.relationships = {};
+		relationships.forEach((relationship: Resource) => {
+			jsonApiResource.relationships[relationship.type] = { id: relationship.id, type: relationship.type };
+			if(!response.included?.some(r => r.id === relationship.id && r.type === relationship.type)) {
+				response.included?.push(relationship);
+			}
+		});
 	}
 }
