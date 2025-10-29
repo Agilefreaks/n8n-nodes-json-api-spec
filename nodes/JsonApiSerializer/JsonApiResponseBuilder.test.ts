@@ -1,0 +1,337 @@
+import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
+
+describe('.buildResponse', () => {
+
+	describe ('with object type', () => {
+		it('returns the resource object with all attributes', () => {
+			const resource = {
+				id: '42',
+				type: 'organization',
+				attributes: {
+					name: 'Agile Freaks SRL',
+					country: 'Romania',
+					region: 'Sibiu',
+				},
+			};
+			const builder = new JsonApiResponseBuilder('object', [resource]);
+
+			expect(builder.buildResponse()).toEqual({
+				data: {
+					id: '42',
+					type: 'organization',
+					attributes: {
+						name: 'Agile Freaks SRL',
+						country: 'Romania',
+						region: 'Sibiu',
+					},
+				},
+			});
+		});
+
+		describe('with resource having relationship', () => {
+			it('returns the resource relationship and included', () => {
+				const resource = {
+					id: '42',
+					type: 'organization',
+					attributes: {
+						name: 'Agile Freaks SRL',
+						country: 'Romania',
+						region: 'Sibiu',
+					},
+					relationships: [
+						{
+							id: '42',
+							type: 'sector',
+							attributes: {
+								name: 'Technology',
+							},
+						},
+					],
+				};
+				const builder = new JsonApiResponseBuilder('object', [resource], true);
+
+				expect(builder.buildResponse()).toEqual({
+					data: {
+						id: '42',
+						type: 'organization',
+						attributes: {
+							name: 'Agile Freaks SRL',
+							country: 'Romania',
+							region: 'Sibiu',
+						},
+						relationships: {
+							sector: {
+								id: '42',
+								type: 'sector',
+							},
+						},
+					},
+					included: [
+						{
+							id: '42',
+							type: 'sector',
+							attributes: {
+								name: 'Technology',
+							},
+						},
+					],
+				});
+			});
+		});
+	});
+
+	describe ('with array type', () => {
+		it('returns resource array with all their attributes', () => {
+			const resources = [
+				{
+					id: '1',
+					type: 'organization',
+					attributes: { name: 'Agile Freaks SRL', country: 'USA' },
+				},
+				{
+					id: '2',
+					type: 'organization',
+					attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+				},
+				{
+					id: '3',
+					type: 'organization',
+					attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+				},
+			];
+
+			const builder = new JsonApiResponseBuilder('array', resources);
+
+			expect(builder.buildResponse()).toEqual({
+				data: [
+					{
+						id: '1',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
+					},
+					{
+						id: '2',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+					},
+					{
+						id: '3',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+					},
+				],
+			});
+		});
+
+		describe('with resources having relationships', () => {
+			it('returns the resource relationship and included', () => {
+				const resources = [
+					{
+						id: '1',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
+						relationships: [
+							{
+								id: '1',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+						]
+					},
+					{
+						id: '2',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+						relationships: [
+							{
+								id: '2',
+								type: 'sector',
+								attributes: {
+									name: 'Software',
+								},
+							},
+						]
+					},
+					{
+						id: '3',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+						relationships: [
+							{
+								id: '3',
+								type: 'sector',
+								attributes: {
+									name: 'Food Industry',
+								},
+							},
+						]
+					},
+				];
+
+				const builder = new JsonApiResponseBuilder('array', resources, true);
+
+				expect(builder.buildResponse()).toEqual({
+					data: [
+						{
+							id: '1',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'USA' },
+							relationships: {
+								sector: {
+									id: '1',
+									type: 'sector',
+								},
+							},
+						},
+						{
+							id: '2',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+							relationships: {
+								sector: {
+									id: '2',
+									type: 'sector',
+								},
+							},
+						},
+						{
+							id: '3',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+							relationships: {
+								sector: {
+									id: '3',
+									type: 'sector',
+								},
+							},
+						},
+					],
+					included: [
+						{
+							id: '1',
+							type: 'sector',
+							attributes: {
+								name: 'Technology',
+							},
+						},
+						{
+							id: '2',
+							type: 'sector',
+							attributes: {
+								name: 'Software',
+							},
+						},
+						{
+							id: '3',
+							type: 'sector',
+							attributes: {
+								name: 'Food Industry',
+							},
+						},
+					],
+				});
+			});
+		});
+
+		describe('with resources having the same relationship', () => {
+
+			it('returns the resource relationship and included', () => {
+				const resources = [
+					{
+						id: '1',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
+						relationships: [
+							{
+								id: '1',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+						]
+					},
+					{
+						id: '2',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+						relationships: [
+							{
+								id: '1',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+						]
+					},
+					{
+						id: '3',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+						relationships: [
+							{
+								id: '1',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+						]
+					},
+				];
+
+				const builder = new JsonApiResponseBuilder('array', resources, true);
+
+				expect(builder.buildResponse()).toEqual({
+					data: [
+						{
+							id: '1',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'USA' },
+							relationships: {
+								sector: {
+									id: '1',
+									type: 'sector',
+								},
+							},
+						},
+						{
+							id: '2',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+							relationships: {
+								sector: {
+									id: '1',
+									type: 'sector',
+								},
+							},
+						},
+						{
+							id: '3',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+							relationships: {
+								sector: {
+									id: '1',
+									type: 'sector',
+								},
+							},
+						},
+					],
+					included: [
+						{
+							id: '1',
+							type: 'sector',
+							attributes: {
+								name: 'Technology',
+							},
+						},
+					],
+				});
+			});
+		})
+	});
+});

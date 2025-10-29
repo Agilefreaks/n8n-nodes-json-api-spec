@@ -24,12 +24,16 @@ Serializes a single resource into JSON API format with a `data` object containin
 - `id` - The resource identifier
 - `type` - The resource type
 - `attributes` - The resource attributes as a JSON object
+- `relationships` (optional) - Relationships to other resources
+- `included` (optional) - Array of related resources included in the response
 
 ### Serialize Resources Array
 Serializes multiple resources into JSON API format with a `data` array, where each item contains:
 - `id` - The resource identifier
 - `type` - The resource type
 - `attributes` - The resource attributes as a JSON object
+- `relationships` (optional) - Relationships to other resources
+- `included` (optional) - Array of related resources included in the response
 
 ## Compatibility
 
@@ -90,8 +94,56 @@ Serializes multiple resources into JSON API format with a `data` array, where ea
 }
 ```
 
+### Example with Relationships and Included Resources
+
+**Input parameters:**
+- Response: `Resource Object`
+- Type: `organization`
+- ID: `6937`
+- Attributes: `{"name": "Test organization", "country": "Kenya", "region": "africa"}`
+- Relationships: `{"sector": {"data": {"type": "sector", "id": "1"}}}`
+- Included: `[{"type": "sector", "id": "1", "attributes": {"name": "Technology", "icb_number": "10101010", "identifier": "technology", "created_at": "2026-01-28T00:00:00Z", "updated_at": "2026-01-30T00:00:00Z"}}]`
+
+**Output:**
+```json
+{
+  "data": {
+    "id": "6937",
+    "type": "organization",
+    "attributes": {
+      "name": "Test organization",
+      "country": "Kenya",
+      "region": "africa"
+    },
+    "relationships": {
+      "sector": {
+        "data": {
+          "type": "sector",
+          "id": "1"
+        }
+      }
+    }
+  },
+  "included": [
+    {
+      "type": "sector",
+      "id": "1",
+      "attributes": {
+        "name": "Technology",
+        "icb_number": "10101010",
+        "identifier": "technology",
+        "created_at": "2026-01-28T00:00:00Z",
+        "updated_at": "2026-01-30T00:00:00Z"
+      }
+    }
+  ]
+}
+```
+
 ### Tips
 - The **Attributes** field accepts JSON format - make sure your JSON is valid
+- The **Relationships** field is optional and should follow the format: `{"relationName": {"data": {"type": "...", "id": "..."}}}`
+- The **Included** field is optional and should be an array of related resources: `[{"type": "...", "id": "...", "attributes": {...}}]`
 - Use the **Resource Object** response type when you need to serialize a single item
 - Use the **Resources Array** response type when working with multiple items from previous nodes
 - The node follows the [JSON API v1.0 specification](https://jsonapi.org/format/)
@@ -101,9 +153,6 @@ Serializes multiple resources into JSON API format with a `data` array, where ea
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
 * [JSON API Specification](https://jsonapi.org/)
 * [JSON API Format Documentation](https://jsonapi.org/format/)
-
-## Todos
-- support include and relationships
 
 ## Development Setup
 
