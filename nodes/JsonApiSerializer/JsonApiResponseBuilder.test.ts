@@ -1,5 +1,5 @@
 import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
-import { ResponseType } from './Types';
+import { Resource, ResponseType } from './Types';
 
 describe('.buildResponse', () => {
 	describe('with object type', () => {
@@ -81,7 +81,7 @@ describe('.buildResponse', () => {
 			});
 		});
 
-		describe('with resource having multiple relationships', () => {
+		describe('with resource having different relationships', () => {
 			it('returns the resource relationship and included', () => {
 				const resource = {
 					id: '42',
@@ -150,6 +150,48 @@ describe('.buildResponse', () => {
 							},
 						},
 					],
+				});
+			});
+		});
+
+		describe('with resource having invalid relationship', () => {
+			it('returns the resource relationship and included', () => {
+				const resource = {
+					id: '42',
+					type: 'organization',
+					attributes: {
+						name: 'Agile Freaks SRL',
+						country: 'Romania',
+						region: 'Sibiu',
+					},
+					relationships: [
+						{
+							id: null,
+							type: 'sector',
+							attributes: {
+								name: null,
+							},
+						},
+					],
+				} as unknown as Resource;
+				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true);
+
+				expect(builder.buildResponse()).toEqual({
+					data: {
+						id: '42',
+						type: 'organization',
+						attributes: {
+							name: 'Agile Freaks SRL',
+							country: 'Romania',
+							region: 'Sibiu',
+						},
+						relationships: {
+							sector: {
+								data: null
+							}
+						},
+					},
+					included: [],
 				});
 			});
 		});
@@ -420,7 +462,7 @@ describe('.buildResponse', () => {
 			});
 		});
 
-		describe('with resources having the multiple relationships', () => {
+		describe('with resources having the different relationships', () => {
 			it('returns the resource relationship and included', () => {
 				const resources = [
 					{

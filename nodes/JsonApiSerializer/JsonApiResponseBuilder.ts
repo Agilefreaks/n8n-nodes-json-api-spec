@@ -59,13 +59,21 @@ export class JsonApiResponseBuilder {
 		jsonApiResource.relationships = {};
 
 		relationships.forEach((relationship: Resource) => {
-			jsonApiResource.relationships[relationship.type] = { data: { id: relationship.id, type: relationship.type }};
+			if(relationship.id) {
+				jsonApiResource.relationships[relationship.type] = { data: { id: relationship.id, type: relationship.type }};
+			}
+			else {
+				jsonApiResource.relationships[relationship.type] = { data: null };
+			}
 		});
 	}
 
 	private addRelationshipsToIncluded(relationships: Resource[] = [], response: JsonApiResponse): void {
 		relationships.forEach((relationship: Resource) => {
-			if (!response.included?.some((resource) => resource.id === relationship.id && resource.type === relationship.type)) {
+			const relationshipAlreadyAdded = response.included?.some((resource) => resource.id === relationship.id && resource.type === relationship.type)
+			const relationshipPresent = relationship.id
+
+			if (relationshipPresent && !relationshipAlreadyAdded) {
 				response.included?.push(relationship);
 			}
 		});
