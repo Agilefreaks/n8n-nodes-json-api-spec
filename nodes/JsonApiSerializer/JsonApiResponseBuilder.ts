@@ -59,7 +59,7 @@ export class JsonApiResponseBuilder {
 		jsonApiResource.relationships = {};
 
 		relationships.forEach((relationship: Resource) => {
-			jsonApiResource.relationships[relationship.type] = { id: relationship.id, type: relationship.type };
+			jsonApiResource.relationships[relationship.type] = { data: { id: relationship.id, type: relationship.type }};
 		});
 	}
 

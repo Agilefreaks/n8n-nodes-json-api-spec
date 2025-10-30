@@ -61,9 +61,11 @@ describe('.buildResponse', () => {
 						},
 						relationships: {
 							sector: {
-								id: '42',
-								type: 'sector',
-							},
+								data: {
+									id: '42',
+									type: 'sector',
+								},
+							}
 						},
 					},
 					included: [
@@ -118,13 +120,17 @@ describe('.buildResponse', () => {
 							region: 'Sibiu',
 						},
 						relationships: {
-							sector: {
-								id: '42',
-								type: 'sector',
+							sector:  {
+								data: {
+									id: '42',
+									type: 'sector',
+								},
 							},
 							owner: {
-								id: '42',
-								type: 'owner',
+								data: {
+									id: '42',
+									type: 'owner',
+								}
 							},
 						},
 					},
@@ -248,10 +254,12 @@ describe('.buildResponse', () => {
 							type: 'organization',
 							attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 							relationships: {
-								sector: {
-									id: '1',
-									type: 'sector',
-								},
+								sector:  {
+									data: {
+										id: '1',
+										type: 'sector',
+									},
+								}
 							},
 						},
 						{
@@ -259,10 +267,12 @@ describe('.buildResponse', () => {
 							type: 'organization',
 							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 							relationships: {
-								sector: {
-									id: '2',
-									type: 'sector',
-								},
+								sector:  {
+									data: {
+										id: '2',
+										type: 'sector',
+									},
+								}
 							},
 						},
 						{
@@ -270,10 +280,12 @@ describe('.buildResponse', () => {
 							type: 'organization',
 							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 							relationships: {
-								sector: {
-									id: '3',
-									type: 'sector',
-								},
+								sector:  {
+									data: {
+										id: '3',
+										type: 'sector',
+									},
+								}
 							},
 						},
 					],
@@ -360,10 +372,12 @@ describe('.buildResponse', () => {
 							type: 'organization',
 							attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 							relationships: {
-								sector: {
-									id: '1',
-									type: 'sector',
-								},
+								sector:  {
+									data: {
+										id: '1',
+										type: 'sector',
+									},
+								}
 							},
 						},
 						{
@@ -371,10 +385,12 @@ describe('.buildResponse', () => {
 							type: 'organization',
 							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 							relationships: {
-								sector: {
-									id: '1',
-									type: 'sector',
-								},
+								sector:  {
+									data: {
+										id: '1',
+										type: 'sector',
+									},
+								}
 							},
 						},
 						{
@@ -382,10 +398,12 @@ describe('.buildResponse', () => {
 							type: 'organization',
 							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 							relationships: {
-								sector: {
-									id: '1',
-									type: 'sector',
-								},
+								sector:  {
+									data: {
+										id: '1',
+										type: 'sector',
+									},
+								}
 							},
 						},
 					],
@@ -479,14 +497,18 @@ describe('.buildResponse', () => {
 							type: 'organization',
 							attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 							relationships: {
-								sector: {
-									id: '1',
-									type: 'sector',
+								sector:  {
+									data: {
+										id: '1',
+										type: 'sector',
+									},
 								},
-								owner: {
-									id: '1',
-									type: 'owner',
-								},
+								owner:  {
+									data: {
+										id: '1',
+										type: 'owner',
+									},
+								}
 							},
 						},
 						{
@@ -494,14 +516,18 @@ describe('.buildResponse', () => {
 							type: 'organization',
 							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 							relationships: {
-								sector: {
-									id: '1',
-									type: 'sector',
+								sector:  {
+									data: {
+										id: '1',
+										type: 'sector',
+									},
 								},
-								owner: {
-									id: '1',
-									type: 'owner',
-								},
+								owner:  {
+									data: {
+										id: '1',
+										type: 'owner',
+									},
+								}
 							},
 						},
 						{
@@ -509,14 +535,18 @@ describe('.buildResponse', () => {
 							type: 'organization',
 							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 							relationships: {
-								sector: {
-									id: '1',
-									type: 'sector',
+								sector:  {
+									data: {
+										id: '1',
+										type: 'sector',
+									},
 								},
-								owner: {
-									id: '1',
-									type: 'owner',
-								},
+								owner:  {
+									data: {
+										id: '1',
+										type: 'owner',
+									},
+								}
 							},
 						},
 					],
