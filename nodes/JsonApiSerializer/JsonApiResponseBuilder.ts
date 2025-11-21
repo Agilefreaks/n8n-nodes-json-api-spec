@@ -76,9 +76,13 @@ export class JsonApiResponseBuilder {
 			const relationshipPresent = relationship.id
 
 			if (relationshipPresent && !relationshipAlreadyAdded) {
-				const { relationshipName, ...resourceWithoutRelationshipName } = relationship;
-				response.included?.push(resourceWithoutRelationshipName);
+				response.included?.push(this.toIncludedResource(relationship));
 			}
 		});
+	}
+
+	private toIncludedResource(resource: Resource): JsonApiResource {
+		const { relationshipName, relationships, ...includedResource } = resource;
+		return includedResource as JsonApiResource;
 	}
 }
