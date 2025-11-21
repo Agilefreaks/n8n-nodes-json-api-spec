@@ -2,9 +2,11 @@ import {
 	type IExecuteFunctions,
 	type INodeExecutionData,
 	type INodeType,
-	type INodeTypeDescription
+	type INodeTypeDescription,
 } from 'n8n-workflow';
-import { buildPayload, parseAttributes, type ResourceInput } from './serializer';
+import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
+import { Resource, ResponseType } from './Types';
+import { parseResource } from './Helpers';
 
 export class JsonApiSerializer implements INodeType {
 	description: INodeTypeDescription = {
@@ -27,11 +29,11 @@ export class JsonApiSerializer implements INodeType {
 				options: [
 					{
 						name: 'Resource Object',
-						value: 'object',
+						value: ResponseType.OBJECT,
 					},
 					{
 						name: 'Resources Array',
-						value: 'array',
+						value: ResponseType.ARRAY,
 					},
 				],
 				default: 'object',
@@ -63,35 +65,75 @@ export class JsonApiSerializer implements INodeType {
 				description: 'The attributes of the resource',
 				required: true,
 			},
+			{
+				displayName: 'Include Resources',
+				name: 'included',
+				type: 'fixedCollection',
+				typeOptions: {
+					multipleValues: true,
+				},
+				default: {},
+				placeholder: 'Add include resource',
+				description: 'Add include resource',
+				options: [
+					{
+						displayName: 'Resource',
+						name: 'resources',
+						values: [
+							{
+								displayName: 'Type',
+								name: 'type',
+								type: 'string',
+								default: '',
+								description: 'Name of the included resource',
+								required: true,
+							},
+							{
+								displayName: 'Relationship Name',
+								name: 'relationshipName',
+								type: 'string',
+								default: '',
+								description: 'Name for the relationship in the response',
+								required: true,
+							},
+							{
+								displayName: 'Attributes',
+								name: 'attributes',
+								type: 'json',
+								default: '',
+								description: 'Attributes of the included resource',
+								required: true,
+							},
+						],
+					},
+				],
+			},
 		],
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const response_type = this.getNodeParameter('response_type', 0) as 'object' | 'array';
+		const response_type = this.getNodeParameter('response_type', 0) as ResponseType;
+		const raw_included = this.getNodeParameter('included', 0) as any;
+		const has_relationships = raw_included.resources?.length > 0;
 
-		const resources: ResourceInput[] = [];
+		const resources: Resource[] = [];
 
-		if (response_type === 'object') {
-			const resource_type = this.getNodeParameter('resource_type', 0) as string;
-			const resource_id = this.getNodeParameter('resource_id', 0) as string;
-			const resource_attributes = this.getNodeParameter('resource_attributes', 0) as string;
-			const attributes = parseAttributes(this.getNode(), resource_attributes);
+		if (response_type === ResponseType.OBJECT) {
+			const resource = parseResource(this, 0);
 
-			resources.push({ resource_type, resource_id, attributes });
+			resources.push(resource);
 		} else {
 			const items = this.getInputData();
-			for (let i = 0; i < items.length; i++) {
-				const resource_type = this.getNodeParameter('resource_type', i) as string;
-				const resource_id = this.getNodeParameter('resource_id', i) as string;
-				const resource_attributes = this.getNodeParameter('resource_attributes', i) as string;
-				const attributes = parseAttributes(this.getNode(), resource_attributes);
 
-				resources.push({ resource_type, resource_id, attributes });
+			for (let i = 0; i < items.length; i++) {
+				const resource = parseResource(this, i);
+
+				resources.push(resource);
 			}
 		}
 
-		const payload = buildPayload(response_type, resources);
+		const response = new JsonApiResponseBuilder(response_type, resources, has_relationships).buildResponse();
 
-		return [this.helpers.returnJsonArray(payload as any)];
+		return [this.helpers.returnJsonArray(response as any)];
 	}
 }
