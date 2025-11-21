@@ -59,11 +59,13 @@ export class JsonApiResponseBuilder {
 		jsonApiResource.relationships = {};
 
 		relationships.forEach((relationship: Resource) => {
+			const relationshipName = relationship.relationshipName || relationship.type;
+
 			if(relationship.id) {
-				jsonApiResource.relationships[relationship.type] = { data: { id: relationship.id, type: relationship.type }};
+				jsonApiResource.relationships[relationshipName] = { data: { id: relationship.id, type: relationship.type }};
 			}
 			else {
-				jsonApiResource.relationships[relationship.type] = { data: null };
+				jsonApiResource.relationships[relationshipName] = { data: null };
 			}
 		});
 	}
@@ -74,7 +76,8 @@ export class JsonApiResponseBuilder {
 			const relationshipPresent = relationship.id
 
 			if (relationshipPresent && !relationshipAlreadyAdded) {
-				response.included?.push(relationship);
+				const { relationshipName, ...resourceWithoutRelationshipName } = relationship;
+				response.included?.push(resourceWithoutRelationshipName);
 			}
 		});
 	}

@@ -33,10 +33,16 @@ function parseRelationships(context: IExecuteFunctions): Resource[] {
 
 	return rawIncluded.resources.map((includedResource: any) => {
 		const type = includedResource.type;
+		const relationshipName = includedResource.relationshipName;
 		const attributes = parseAttributes(context.getNode(), includedResource.attributes);
 		const id = attributes.id;
 		delete attributes.id;
 
-		return { id, type, attributes };
+		const resource: Resource = { id, type, attributes };
+		if (relationshipName) {
+			resource.relationshipName = relationshipName;
+		}
+
+		return resource;
 	});
 }

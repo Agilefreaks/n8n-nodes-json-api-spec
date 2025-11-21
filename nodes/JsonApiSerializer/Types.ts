@@ -2,7 +2,8 @@ export interface Resource {
 	id: string;
 	type: string;
 	attributes: any;
-	relationships?: Resource[]
+	relationships?: Resource[];
+	relationshipName?: string;
 }
 
 export interface JsonApiResponse {

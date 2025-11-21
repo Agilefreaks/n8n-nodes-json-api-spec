@@ -154,6 +154,60 @@ describe('.buildResponse', () => {
 			});
 		});
 
+		describe('with resource having different relationship name then resource type', () => {
+			it('returns the resource relationship and included', () => {
+				const resource = {
+					id: '42',
+					type: 'contact',
+					attributes: {
+						name: 'Mister Daniel'
+					},
+					relationships: [
+						{
+							id: '42',
+							type: 'organization',
+							relationshipName: 'membership',
+							attributes: {
+								name: 'Agile Freaks SRL',
+								country: 'Romania',
+								region: 'Sibiu'
+							},
+						},
+					],
+				};
+				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true);
+
+				expect(builder.buildResponse()).toEqual({
+					data: {
+						id: '42',
+						type: 'contact',
+						attributes: {
+							name: 'Mister Daniel'
+						},
+						relationships: {
+							membership: {
+								data: {
+									id: '42',
+									type: 'organization'
+								},
+							}
+						},
+					},
+					included: [
+						{
+							id: '42',
+							type: 'organization',
+							attributes: {
+								name: 'Agile Freaks SRL',
+								country: 'Romania',
+								region: 'Sibiu'
+							},
+						},
+					],
+				});
+			});
+		});
+
 		describe('with resource having invalid relationship', () => {
 			it('returns the resource relationship and included', () => {
 				const resource = {

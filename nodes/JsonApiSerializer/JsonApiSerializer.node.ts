@@ -89,6 +89,14 @@ export class JsonApiSerializer implements INodeType {
 								required: true,
 							},
 							{
+								displayName: 'Relationship Name',
+								name: 'relationshipName',
+								type: 'string',
+								default: '',
+								description: 'Name for the relationship in the response',
+								required: true,
+							},
+							{
 								displayName: 'Attributes',
 								name: 'attributes',
 								type: 'json',
