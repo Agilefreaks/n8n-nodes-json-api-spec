@@ -10,7 +10,8 @@ This is an n8n community node. It lets you serialize data to JSON API Specificat
 [Operations](#operations)  
 [Compatibility](#compatibility)  
 [Usage](#usage)  
-[Resources](#resources)
+[Resources](#resources)  
+[TODO](#todo)
 ## Installation
 
 Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
@@ -191,10 +192,60 @@ The optional parameter `included` will add `data.relationshiphs` and `included` 
 }
 ```
 
+### Example with Custom Relationship Name
+
+You can specify a custom name for relationships that differs from the resource type. This is useful when the semantic meaning of the relationship differs from the resource type itself.
+
+**Input parameters:**
+- Response: `Resource Object`
+- Type: `contact`
+- ID: `42`
+- Attributes: `{"name": "Mister Daniel"}`
+- Include Resources:
+  - Resource:
+    - Type: `organization`
+    - Relationship Name: `membership`
+    - Attributes: `{"id": "42", "name": "Agile Freaks SRL", "country": "Romania", "region": "Sibiu"}`
+
+**Output:**
+```json
+{
+  "data": {
+    "id": "42",
+    "type": "contact",
+    "attributes": {
+      "name": "Mister Daniel"
+    },
+    "relationships": {
+      "membership": {
+        "data": {
+          "id": "42",
+          "type": "organization"
+        }
+      }
+    }
+  },
+  "included": [
+    {
+      "id": "42",
+      "type": "organization",
+      "attributes": {
+        "name": "Agile Freaks SRL",
+        "country": "Romania",
+        "region": "Sibiu"
+      }
+    }
+  ]
+}
+```
+
+In this example, even though the resource type is `organization`, the relationship is named `membership` to better represent the semantic relationship between a contact and their organization.
+
 ### Tips
 - The **Attributes** field accepts JSON format - make sure your JSON is valid
 - The **Include Resources** field is optional. Add one or more resources that will appear in both the `relationships` and `included` sections
   - Each included resource requires a **Type**
+  - The **Relationship Name** is required and specifies the key name for the relationship in the output
   - The **Attributes** must be a JSON object that includes an `id` field - this `id` will be extracted and used for the relationship reference
 - Use the **Resource Object** response type when you need to serialize a single item
 - Use the **Resources Array** response type when working with multiple items from previous nodes
@@ -260,6 +311,13 @@ git push
 npm publish
 ```
 
+
+## TODO
+
+### Array Support for Relationships
+Currently, relationships and included resources work only with single object responses. The following enhancements are planned:
+
+- [ ] Support relationships and included resources for array responses
 
 ## License
 
