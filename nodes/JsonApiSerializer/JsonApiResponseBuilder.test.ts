@@ -249,6 +249,79 @@ describe('.buildResponse', () => {
 				});
 			});
 		});
+
+		describe('with resource having many relationships', () => {
+			it('returns the resource relationship and included', () => {
+				const resource = {
+					id: '42',
+					type: 'organization',
+					attributes: {
+						name: 'Agile Freaks SRL',
+						country: 'Romania',
+						region: 'Sibiu',
+					},
+					relationships: [
+						{
+							id: '42',
+							type: 'sector',
+							attributes: {
+								name: 'Technology',
+							},
+						},
+						{
+							id: '43',
+							type: 'sector',
+							attributes: {
+								name: 'Food Industry',
+							},
+						},
+					],
+				};
+				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true);
+
+				expect(builder.buildResponse()).toEqual({
+					data: {
+						id: '42',
+						type: 'organization',
+						attributes: {
+							name: 'Agile Freaks SRL',
+							country: 'Romania',
+							region: 'Sibiu',
+						},
+						relationships: {
+							sectors: {
+								data: [
+									{
+										id: '42',
+										type: 'sector',
+									},
+									{
+										id: '43',
+										type: 'sector',
+									},
+								],
+							},
+						},
+						included: [
+							{
+								id: '42',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+							{
+								id: '43',
+								type: 'sector',
+								attributes: {
+									name: 'Food Industry',
+								},
+							},
+						],
+					},
+				});
+			});
+		});
 	});
 
 	describe('with array type', () => {
