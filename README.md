@@ -33,7 +33,12 @@ Serializes multiple resources into JSON API format with a `data` array, where ea
 - `attributes` - The resource attributes as a JSON object
 
 ### Serialize Resource Object and Array with Relationships
-The optional parameter `included` will add `data.relationshiphs` and `included` keys with the resources provided.
+The optional parameter `included` will add `data.relationships` and `included` keys with the resources provided.
+
+### Pagination Support (Array Only)
+When serializing an array of resources, you can enable pagination to add JSON API compliant `links` and `meta` sections:
+- `links` - Contains `first`, `prev`, `next`, `last` URLs for navigation
+- `meta` - Contains page info (`current`, `size`, `total`) and total resource count
 
 ## Compatibility
 
@@ -240,6 +245,61 @@ You can specify a custom name for relationships that differs from the resource t
 ```
 
 In this example, even though the resource type is `organization`, the relationship is named `membership` to better represent the semantic relationship between a contact and their organization.
+
+### Example with Pagination
+
+**Input parameters:**
+- Response: `Resources Array`
+- Type: `contact`
+- Add Pagination: `enabled`
+- Base URL: `http://localhost:5678/webhook/v1/contacts`
+- Current Page: `2`
+- Items Per Page: `200`
+- Total Resource Count: `800`
+- Query Params: `{"filter": {"organization_id": "42"}, "sort": "name"}`
+
+**Output:**
+```json
+{
+  "data": [
+    {
+      "id": "1",
+      "type": "contact",
+      "attributes": {
+        "name": "John Doe"
+      }
+    },
+    {
+      "id": "2",
+      "type": "contact",
+      "attributes": {
+        "name": "Jane Smith"
+      }
+    }
+  ],
+  "links": {
+    "first": "http://localhost:5678/webhook/v1/contacts?filter%5Borganization_id%5D=42&sort=name&page=1&per_page=200",
+    "prev": "http://localhost:5678/webhook/v1/contacts?filter%5Borganization_id%5D=42&sort=name&page=1&per_page=200",
+    "next": "http://localhost:5678/webhook/v1/contacts?filter%5Borganization_id%5D=42&sort=name&page=3&per_page=200",
+    "last": "http://localhost:5678/webhook/v1/contacts?filter%5Borganization_id%5D=42&sort=name&page=4&per_page=200"
+  },
+  "meta": {
+    "page": {
+      "current": 2,
+      "size": 200,
+      "total": 4
+    },
+    "total_contact_count": 800
+  }
+}
+```
+
+**Pagination Notes:**
+- `prev` is `null` on the first page
+- `next` is `null` on the last page
+- The `total_<type>_count` key is dynamically named based on the resource type
+- Query Params accepts a JSON object (e.g., from `$('Webhook').first().json.query`) and preserves all params except `page` and `per_page`
+- Nested objects like `filter[organization_id]` are properly serialized
 
 ### Tips
 - The **Attributes** field accepts JSON format - make sure your JSON is valid
