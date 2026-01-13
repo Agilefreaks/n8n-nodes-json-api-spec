@@ -5,7 +5,7 @@ import {
 	type INodeTypeDescription,
 } from 'n8n-workflow';
 import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
-import { Resource, ResponseType } from './Types';
+import { PaginationConfig, Resource, ResponseType } from './Types';
 import { parseResource } from './Helpers';
 
 export class JsonApiSerializer implements INodeType {
@@ -108,6 +108,75 @@ export class JsonApiSerializer implements INodeType {
 					},
 				],
 			},
+			{
+				displayName: 'Add Pagination',
+				name: 'add_pagination',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to add pagination links and meta to the response',
+				displayOptions: {
+					show: {
+						response_type: [ResponseType.ARRAY],
+					},
+				},
+			},
+			{
+				displayName: 'Base URL',
+				name: 'pagination_base_url',
+				type: 'string',
+				default: '',
+				placeholder: "={{ $('Webhook').first().json.webhookUrl }}",
+				description: 'The base URL for pagination links',
+				required: true,
+				displayOptions: {
+					show: {
+						response_type: [ResponseType.ARRAY],
+						add_pagination: [true],
+					},
+				},
+			},
+			{
+				displayName: 'Current Page',
+				name: 'pagination_page',
+				type: 'string',
+				default: "={{ $('Parse input').first().json.page }}",
+				description: 'The current page number',
+				required: true,
+				displayOptions: {
+					show: {
+						response_type: [ResponseType.ARRAY],
+						add_pagination: [true],
+					},
+				},
+			},
+			{
+				displayName: 'Items Per Page',
+				name: 'pagination_per_page',
+				type: 'string',
+				default: "={{ $('Parse input').first().json.per_page }}",
+				description: 'Number of items per page',
+				required: true,
+				displayOptions: {
+					show: {
+						response_type: [ResponseType.ARRAY],
+						add_pagination: [true],
+					},
+				},
+			},
+			{
+				displayName: 'Total Resource Count',
+				name: 'pagination_total_count',
+				type: 'number',
+				default: 0,
+				description: 'Total number of resources across all pages',
+				required: true,
+				displayOptions: {
+					show: {
+						response_type: [ResponseType.ARRAY],
+						add_pagination: [true],
+					},
+				},
+			},
 		],
 	};
 
@@ -115,6 +184,20 @@ export class JsonApiSerializer implements INodeType {
 		const response_type = this.getNodeParameter('response_type', 0) as ResponseType;
 		const raw_included = this.getNodeParameter('included', 0) as any;
 		const has_relationships = raw_included.resources?.length > 0;
+
+		let pagination: PaginationConfig | undefined;
+		if (response_type === ResponseType.ARRAY) {
+			const addPagination = this.getNodeParameter('add_pagination', 0, false) as boolean;
+			if (addPagination) {
+				pagination = {
+					enabled: true,
+					baseUrl: this.getNodeParameter('pagination_base_url', 0) as string,
+					page: this.getNodeParameter('pagination_page', 0) as number,
+					perPage: this.getNodeParameter('pagination_per_page', 0) as number,
+					totalResourceCount: this.getNodeParameter('pagination_total_count', 0) as number,
+				};
+			}
+		}
 
 		const resources: Resource[] = [];
 
@@ -132,7 +215,7 @@ export class JsonApiSerializer implements INodeType {
 			}
 		}
 
-		const response = new JsonApiResponseBuilder(response_type, resources, has_relationships).buildResponse();
+		const response = new JsonApiResponseBuilder(response_type, resources, has_relationships, pagination).buildResponse();
 
 		return [this.helpers.returnJsonArray(response as any)];
 	}
