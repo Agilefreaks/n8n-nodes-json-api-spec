@@ -94,11 +94,36 @@ export class JsonApiResponseBuilder {
 	}
 
 	private buildPageUrl(page: number): string {
-		const { baseUrl, perPage } = this.pagination!;
+		const { baseUrl, perPage, queryParams } = this.pagination!;
 		const url = new URL(baseUrl);
+
+		if (queryParams) {
+			this.flattenQueryParams(queryParams).forEach(([key, value]) => {
+				if (key !== 'page' && key !== 'per_page') {
+					url.searchParams.set(key, value);
+				}
+			});
+		}
+
 		url.searchParams.set('page', page.toString());
 		url.searchParams.set('per_page', perPage.toString());
 		return url.toString();
+	}
+
+	private flattenQueryParams(obj: Record<string, any>, prefix = ''): [string, string][] {
+		const result: [string, string][] = [];
+
+		for (const [key, value] of Object.entries(obj)) {
+			const newKey = prefix ? `${prefix}[${key}]` : key;
+
+			if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+				result.push(...this.flattenQueryParams(value, newKey));
+			} else {
+				result.push([newKey, String(value)]);
+			}
+		}
+
+		return result;
 	}
 
 	private getTotalPages(): number {

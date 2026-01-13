@@ -789,6 +789,31 @@ describe('.buildResponse', () => {
 				expect(response.links?.first).toContain('per_page=50');
 			});
 
+			it('preserves additional url params from queryParams', () => {
+				const resources = [{ id: '1', type: 'contact', attributes: { name: 'Contact 1' } }];
+				const pagination: PaginationConfig = {
+					enabled: true,
+					baseUrl: 'http://localhost:5678/webhook/v1/contacts',
+					page: 2,
+					perPage: 50,
+					totalResourceCount: 500,
+					queryParams: {
+						filter: { organization_id: '42' },
+						sort: 'name',
+						page: 2,
+						per_page: 50,
+					},
+				};
+
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, pagination);
+				const response = builder.buildResponse();
+
+				expect(response.links?.first).toContain('filter%5Borganization_id%5D=42');
+				expect(response.links?.first).toContain('sort=name');
+				expect(response.links?.first).toContain('page=1');
+				expect(response.links?.first).toContain('per_page=50');
+			});
+
 			it('does not add links or meta when pagination not provided', () => {
 				const resources = [{ id: '1', type: 'contact', attributes: { name: 'Contact 1' } }];
 				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false);

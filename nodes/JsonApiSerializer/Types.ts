@@ -12,6 +12,7 @@ export interface PaginationConfig {
 	page: number;
 	perPage: number;
 	totalResourceCount: number;
+	queryParams?: Record<string, any>;
 }
 
 export interface JsonApiLinks {

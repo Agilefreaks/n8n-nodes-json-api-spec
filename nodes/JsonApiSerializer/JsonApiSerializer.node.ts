@@ -177,6 +177,20 @@ export class JsonApiSerializer implements INodeType {
 					},
 				},
 			},
+			{
+				displayName: 'Query Params',
+				name: 'pagination_query_params',
+				type: 'json',
+				default: '{}',
+				placeholder: "={{ $('Webhook').first().json.query }}",
+				description: 'Additional query params to include in pagination links as JSON object',
+				displayOptions: {
+					show: {
+						response_type: [ResponseType.ARRAY],
+						add_pagination: [true],
+					},
+				},
+			},
 		],
 	};
 
@@ -189,12 +203,15 @@ export class JsonApiSerializer implements INodeType {
 		if (response_type === ResponseType.ARRAY) {
 			const addPagination = this.getNodeParameter('add_pagination', 0, false) as boolean;
 			if (addPagination) {
+				const queryParamsRaw = this.getNodeParameter('pagination_query_params', 0, '{}') as string;
+				const queryParams = queryParamsRaw === 'string' ? JSON.parse(queryParamsRaw || '{}') : queryParamsRaw;
 				pagination = {
 					enabled: true,
 					baseUrl: this.getNodeParameter('pagination_base_url', 0) as string,
 					page: this.getNodeParameter('pagination_page', 0) as number,
 					perPage: this.getNodeParameter('pagination_per_page', 0) as number,
 					totalResourceCount: this.getNodeParameter('pagination_total_count', 0) as number,
+					queryParams,
 				};
 			}
 		}
