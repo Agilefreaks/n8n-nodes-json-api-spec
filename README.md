@@ -274,10 +274,10 @@ pnpm install
 pnpm run build
 ```
 6. Run n8n in docker mode
-7. Configure n8n docker container to use this custom node. Add the following volume for n8n-main service
+7. Configure n8n docker container to use this custom node. Add the following volume for n8n-main service. You have to determine `YOUR_PATH` by running `pwd` in the location you cloned this repo at. Can look something like `/Users/.../n8n-nodes-json-api-spec`.
 ```yaml
   volumes:
-    - ~/n8n-nodes-json-api-spec/dist:/home/node/.n8n/custom/node_modules/n8n-nodes-json-api-spec
+    - {YOUR_PATH}/dist:/home/node/.n8n/custom/node_modules/n8n-nodes-json-api-spec
 ```
 
 ## Development
