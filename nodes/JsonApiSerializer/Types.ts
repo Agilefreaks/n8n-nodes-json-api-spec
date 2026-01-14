@@ -6,9 +6,36 @@ export interface Resource {
 	relationshipName?: string;
 }
 
+export interface PaginationConfig {
+	enabled: boolean;
+	baseUrl: string;
+	page: number;
+	perPage: number;
+	totalResourceCount: number;
+	queryParams?: Record<string, any>;
+}
+
+export interface JsonApiLinks {
+	first: string;
+	prev: string | null;
+	next: string | null;
+	last: string;
+}
+
+export interface JsonApiMeta {
+	page: {
+		current: number;
+		size: number;
+		total: number;
+	};
+	[key: string]: number | { current: number; size: number; total: number };
+}
+
 export interface JsonApiResponse {
 	data: JsonApiResource | JsonApiResource[];
 	included?: JsonApiResource[];
+	links?: JsonApiLinks;
+	meta?: JsonApiMeta;
 }
 
 export interface JsonApiResource {
