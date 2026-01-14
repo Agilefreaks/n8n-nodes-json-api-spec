@@ -111,19 +111,14 @@ export class JsonApiResponseBuilder {
 	}
 
 	private flattenQueryParams(obj: Record<string, any>, prefix = ''): [string, string][] {
-		const result: [string, string][] = [];
-
-		for (const [key, value] of Object.entries(obj)) {
+		return Object.entries(obj).flatMap(([key, value]) => {
 			const newKey = prefix ? `${prefix}[${key}]` : key;
 
 			if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-				result.push(...this.flattenQueryParams(value, newKey));
-			} else {
-				result.push([newKey, String(value)]);
+				return this.flattenQueryParams(value, newKey);
 			}
-		}
-
-		return result;
+			return [[newKey, String(value)] as [string, string]];
+		});
 	}
 
 	private getTotalPages(): number {
