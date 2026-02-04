@@ -33,7 +33,15 @@ Serializes multiple resources into JSON API format with a `data` array, where ea
 - `attributes` - The resource attributes as a JSON object
 
 ### Serialize Resource Object and Array with Relationships
-The optional parameter `included` will add `data.relationships` and `included` keys with the resources provided.
+Enable Include Relationships will add `data.relationships` and `included` keys with the resources provided.
+
+### Include Filter
+When "Enable Include Relationships" is enabled, you can use the **Include Filter** field to control which relationships are returned in the response. This is useful for implementing the JSON API `include` query parameter pattern.
+
+- **Include Filter**: A comma-separated list of relationship names to include (e.g., `sector,owner`)
+- If empty, no relationships or included resources will be returned
+- The filter matches against the relationship name (or type if no custom name is set)
+- Default value pulls from `$('Webhook').first().json.query.include` to automatically use the `include` parameter from incoming API requests
 
 ### Pagination Support (Array Only)
 When serializing an array of resources, you can enable pagination to add JSON API compliant `links` and `meta` sections:
@@ -106,6 +114,8 @@ When serializing an array of resources, you can enable pagination to add JSON AP
 - Type: `organization`
 - ID: `6937`
 - Attributes: `{"name": "Test organization", "country": "Kenya", "region": "africa"}`
+- Enable Include Relationships: `true`
+- Include Filter: `{{ $('Webhook').first().json.query.include }}` (default)
 - Include Resources:
   - Resource:
     - Type: `sector`
@@ -141,6 +151,61 @@ When serializing an array of resources, you can enable pagination to add JSON AP
 }
 ```
 
+### Example with Include Filter
+
+This example shows how to filter which relationships are returned. When you have multiple relationships configured but only want to return specific ones based on the API request.
+
+**Input parameters:**
+- Response: `Resource Object`
+- Type: `organization`
+- ID: `42`
+- Attributes: `{"name": "Agile Freaks SRL", "country": "Romania"}`
+- Enable Include Relationships: `true`
+- Include Filter: `sector` (only return sector, not owner)
+- Include Resources:
+	- Resource:
+		- Type: `sector`
+		- Relationship Name: `sector`
+		- Attributes: `{"id": "1", "name": "Technology"}`
+	- Resource:
+		- Type: `owner`
+		- Relationship Name: `owner`
+		- Attributes: `{"id": "1", "name": "Boss"}`
+
+**Output:**
+```json
+{
+  "data": {
+    "id": "42",
+    "type": "organization",
+    "attributes": {
+      "name": "Agile Freaks SRL",
+      "country": "Romania"
+    },
+    "relationships": {
+      "sector": {
+        "data": {
+          "id": "1",
+          "type": "sector"
+        }
+      }
+    }
+  },
+  "included": [
+    {
+      "id": "1",
+      "type": "sector",
+      "attributes": {
+        "name": "Technology"
+      }
+    }
+  ]
+}
+```
+
+Note that even though both `sector` and `owner` are configured as Include Resources, only `sector` appears in the output because the Include Filter is set to `sector`. This allows you to configure all possible relationships once and dynamically filter them based on the incoming API request's `include` parameter.
+
+
 ### Example with Multiple Included Resources
 
 **Input parameters:**
@@ -148,6 +213,8 @@ When serializing an array of resources, you can enable pagination to add JSON AP
 - Type: `organization`
 - ID: `42`
 - Attributes: `{"name": "Agile Freaks SRL", "country": "Romania", "region": "Sibiu"}`
+- Enable Include Relationships: `true`
+- Include Filter: `{{ $('Webhook').first().json.query.include }}` (default)
 - Include Resources:
   - Resource:
     - Type: `sector`
@@ -206,6 +273,8 @@ You can specify a custom name for relationships that differs from the resource t
 - Type: `contact`
 - ID: `42`
 - Attributes: `{"name": "Mister Daniel"}`
+- Enable Include Relationships: `true`
+- Include Filter: `{{ $('Webhook').first().json.query.include }}` (default)
 - Include Resources:
   - Resource:
     - Type: `organization`
