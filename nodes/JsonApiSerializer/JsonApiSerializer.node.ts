@@ -66,6 +66,25 @@ export class JsonApiSerializer implements INodeType {
 				required: true,
 			},
 			{
+				displayName: 'Enable Include Relationships',
+				name: 'enable_include_resources',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to allow configuration for include and relationships added to the response'
+			},
+			{
+				displayName: 'Include Filter',
+				name: 'include_filter',
+				type: 'string',
+				default: "={{ $('Webhook').first().json.query.include }}",
+				description: 'Array of relationship names to include in the response. Default value is the include parameter from incoming request. Setting empty will NOT return any includes.',
+				displayOptions: {
+					show: {
+						enable_include_resources: [true],
+					},
+				},
+			},
+			{
 				displayName: 'Include Resources',
 				name: 'included',
 				type: 'fixedCollection',
@@ -107,6 +126,11 @@ export class JsonApiSerializer implements INodeType {
 						],
 					},
 				],
+				displayOptions: {
+					show: {
+						enable_include_resources: [true],
+					},
+				},
 			},
 			{
 				displayName: 'Add Pagination',
@@ -198,6 +222,10 @@ export class JsonApiSerializer implements INodeType {
 		const response_type = this.getNodeParameter('response_type', 0) as ResponseType;
 		const raw_included = this.getNodeParameter('included', 0) as any;
 		const has_relationships = raw_included.resources?.length > 0;
+		const include_filter_raw = this.getNodeParameter('include_filter', 0, '') as string;
+		const include_filter: string[] = include_filter_raw
+			? include_filter_raw.split(',').map(s => s.trim()).filter(Boolean)
+			: [];
 
 		let pagination: PaginationConfig | undefined;
 		if (response_type === ResponseType.ARRAY) {
@@ -232,7 +260,13 @@ export class JsonApiSerializer implements INodeType {
 			}
 		}
 
-		const response = new JsonApiResponseBuilder(response_type, resources, has_relationships, pagination).buildResponse();
+		const response = new JsonApiResponseBuilder(
+			response_type,
+			resources,
+			has_relationships,
+			include_filter,
+			pagination,
+		).buildResponse();
 
 		return [this.helpers.returnJsonArray(response as any)];
 	}

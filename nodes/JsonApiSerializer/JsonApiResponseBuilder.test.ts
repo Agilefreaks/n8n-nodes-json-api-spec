@@ -48,7 +48,7 @@ describe('.buildResponse', () => {
 						},
 					],
 				};
-				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true);
+				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true, ['sector']);
 
 				expect(builder.buildResponse()).toEqual({
 					data: {
@@ -108,7 +108,7 @@ describe('.buildResponse', () => {
 						},
 					],
 				};
-				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true);
+				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true, ['sector', 'owner']);
 
 				expect(builder.buildResponse()).toEqual({
 					data: {
@@ -175,7 +175,7 @@ describe('.buildResponse', () => {
 						},
 					],
 				};
-				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true);
+				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true, ['membership']);
 
 				expect(builder.buildResponse()).toEqual({
 					data: {
@@ -228,7 +228,7 @@ describe('.buildResponse', () => {
 						},
 					],
 				} as unknown as Resource;
-				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true);
+				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true, ['sector']);
 
 				expect(builder.buildResponse()).toEqual({
 					data: {
@@ -341,7 +341,7 @@ describe('.buildResponse', () => {
 					},
 				];
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true, ['sector']);
 
 				expect(builder.buildResponse()).toEqual({
 					data: [
@@ -412,6 +412,131 @@ describe('.buildResponse', () => {
 			});
 		});
 
+		describe('with resources having selected includes', () => {
+			it('returns the resource relationship and included', () => {
+				const resources = [
+					{
+						id: '1',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
+						relationships: [
+							{
+								id: '1',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+							{
+								id: '1',
+								type: 'owner',
+								attributes: {
+									name: 'Boss',
+								},
+							},
+						],
+					},
+					{
+						id: '2',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+						relationships: [
+							{
+								id: '1',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+							{
+								id: '1',
+								type: 'owner',
+								attributes: {
+									name: 'Boss',
+								},
+							},
+						],
+					},
+					{
+						id: '3',
+						type: 'organization',
+						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+						relationships: [
+							{
+								id: '1',
+								type: 'sector',
+								attributes: {
+									name: 'Technology',
+								},
+							},
+							{
+								id: '1',
+								type: 'owner',
+								attributes: {
+									name: 'Boss',
+								},
+							},
+						],
+					},
+				];
+
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true, ['sector']);
+
+				expect(builder.buildResponse()).toEqual({
+					data: [
+						{
+							id: '1',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'USA' },
+							relationships: {
+								sector:  {
+									data: {
+										id: '1',
+										type: 'sector',
+									},
+								}
+							},
+						},
+						{
+							id: '2',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+							relationships: {
+								sector:  {
+									data: {
+										id: '1',
+										type: 'sector',
+									},
+								}
+							},
+						},
+						{
+							id: '3',
+							type: 'organization',
+							attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
+							relationships: {
+								sector:  {
+									data: {
+										id: '1',
+										type: 'sector',
+									},
+								}
+							},
+						},
+					],
+					included: [
+						{
+							id: '1',
+							type: 'sector',
+							attributes: {
+								name: 'Technology',
+							},
+						}
+					],
+				});
+			});
+		});
+
 		describe('with resources having the same relationship', () => {
 			it('returns the resource relationship and included', () => {
 				const resources = [
@@ -459,7 +584,7 @@ describe('.buildResponse', () => {
 					},
 				];
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true, ['sector']);
 
 				expect(builder.buildResponse()).toEqual({
 					data: [
@@ -584,7 +709,7 @@ describe('.buildResponse', () => {
 					},
 				];
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true, ['sector', 'owner']);
 
 				expect(builder.buildResponse()).toEqual({
 					data: [
@@ -694,7 +819,7 @@ describe('.buildResponse', () => {
 					totalResourceCount: 800,
 				};
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, pagination);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, [], pagination);
 
 				expect(builder.buildResponse()).toEqual({
 					data: [
@@ -729,7 +854,7 @@ describe('.buildResponse', () => {
 					totalResourceCount: 800,
 				};
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, pagination);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, [], pagination);
 				const response = builder.buildResponse();
 
 				expect(response.links?.prev).toBeNull();
@@ -746,7 +871,7 @@ describe('.buildResponse', () => {
 					totalResourceCount: 800,
 				};
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, pagination);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, [], pagination);
 				const response = builder.buildResponse();
 
 				expect(response.links?.next).toBeNull();
@@ -763,7 +888,7 @@ describe('.buildResponse', () => {
 					totalResourceCount: 50,
 				};
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, pagination);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, [], pagination);
 				const response = builder.buildResponse();
 
 				expect(response.links?.prev).toBeNull();
@@ -782,7 +907,7 @@ describe('.buildResponse', () => {
 					totalResourceCount: 500,
 				};
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, pagination);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, [], pagination);
 				const response = builder.buildResponse();
 
 				expect(response.links?.first).toContain('page=1');
@@ -805,7 +930,7 @@ describe('.buildResponse', () => {
 					},
 				};
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, pagination);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, false, [], pagination);
 				const response = builder.buildResponse();
 
 				expect(response.links?.first).toContain('filter%5Borganization_id%5D=42');
@@ -879,7 +1004,7 @@ describe('.buildResponse', () => {
 					totalResourceCount: 800,
 				};
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true, pagination);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true, ['sector'], pagination);
 
 				expect(builder.buildResponse()).toEqual({
 					data: [
