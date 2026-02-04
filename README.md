@@ -378,6 +378,7 @@ npm publish
 Currently, relationships and included resources work only with single object responses. The following enhancements are planned:
 
 - [ ] Support relationships and included resources for array responses
+- [ ] When empty input for Array type, return { data: [] }
 
 ## License
 
