@@ -220,12 +220,19 @@ export class JsonApiSerializer implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const response_type = this.getNodeParameter('response_type', 0) as ResponseType;
-		const raw_included = this.getNodeParameter('included', 0) as any;
-		const has_relationships = raw_included.resources?.length > 0;
-		const include_filter_raw = this.getNodeParameter('include_filter', 0, '') as string;
-		const include_filter: string[] = include_filter_raw
-			? include_filter_raw.split(',').map(s => s.trim()).filter(Boolean)
-			: [];
+		const enable_include_resources = this.getNodeParameter('enable_include_resources', 0, false) as boolean;
+
+		let has_relationships = false;
+		let include_filter: string[] = [];
+
+		if (enable_include_resources) {
+			const raw_included = this.getNodeParameter('included', 0) as any;
+			has_relationships = raw_included.resources?.length > 0;
+			const include_filter_raw = this.getNodeParameter('include_filter', 0, '') as string;
+			include_filter = include_filter_raw
+				? include_filter_raw.split(',').map(s => s.trim()).filter(Boolean)
+				: [];
+		}
 
 		let pagination: PaginationConfig | undefined;
 		if (response_type === ResponseType.ARRAY) {

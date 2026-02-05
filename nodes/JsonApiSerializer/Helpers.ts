@@ -31,6 +31,11 @@ export function parseAttributes(node: INode, attributes: string): any {
 }
 
 function parseRelationships(context: IExecuteFunctions): Resource[] {
+	const enableIncludeResources = context.getNodeParameter('enable_include_resources', 0, false) as boolean;
+	if (!enableIncludeResources) {
+		return [];
+	}
+
 	const rawIncluded = context.getNodeParameter('included', 0) as any;
 	if (!rawIncluded.resources?.length) {
 		return [];
