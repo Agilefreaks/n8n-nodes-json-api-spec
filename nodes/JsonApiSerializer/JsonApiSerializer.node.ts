@@ -221,14 +221,18 @@ export class JsonApiSerializer implements INodeType {
 		if (response_type === ResponseType.OBJECT) {
 			const resource = parseResource(this, 0);
 
-			resources.push(resource);
+			if (resource) {
+				resources.push(resource);
+			}
 		} else {
 			const items = this.getInputData();
 
 			for (let i = 0; i < items.length; i++) {
 				const resource = parseResource(this, i);
 
-				resources.push(resource);
+				if (resource) {
+					resources.push(resource);
+				}
 			}
 		}
 

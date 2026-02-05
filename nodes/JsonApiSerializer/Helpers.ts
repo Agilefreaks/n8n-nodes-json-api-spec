@@ -1,10 +1,15 @@
 import { NodeOperationError, type INode, type IExecuteFunctions } from 'n8n-workflow';
 import { Resource } from './Types';
 
-export function parseResource(context: IExecuteFunctions, index: number): Resource {
+export function parseResource(context: IExecuteFunctions, index: number): Resource | undefined {
 	const type = context.getNodeParameter('resource_type', index) as string;
 	const id = context.getNodeParameter('resource_id', index) as string;
 	const resourceAttributes = context.getNodeParameter('resource_attributes', index) as string;
+
+	if (!id || !resourceAttributes || resourceAttributes.trim() === '' || resourceAttributes.trim() === '{}') {
+		return undefined;
+	}
+
 	const attributes = parseAttributes(context.getNode(), resourceAttributes);
 	const relationships = parseRelationships(context);
 
