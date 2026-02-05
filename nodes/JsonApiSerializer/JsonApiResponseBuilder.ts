@@ -4,13 +4,15 @@ export class JsonApiResponseBuilder {
 	response_type: ResponseType;
 	resources: Resource[];
 	has_relationships: boolean = false;
+	include_filter: string[];
 	pagination?: PaginationConfig;
 
-	constructor(response_type: ResponseType, resources: Resource[], has_relationships: boolean = false, pagination?: PaginationConfig) {
+	constructor(response_type: ResponseType, resources: Resource[], has_relationships: boolean = false, include_filter: string[] = [], pagination?: PaginationConfig) {
 		this.response_type = response_type;
 		this.resources = resources;
 		this.has_relationships = has_relationships;
 		this.pagination = pagination;
+		this.include_filter = include_filter;
 	}
 
 	buildResponse(): JsonApiResponse {
@@ -65,7 +67,9 @@ export class JsonApiResponseBuilder {
 	private addRelationshipsToResource(relationships: Resource[] = [], jsonApiResource: JsonApiResource): void {
 		jsonApiResource.relationships = {};
 
-		relationships.forEach((relationship: Resource) => {
+		const filteredRelationships = this.filterRelationshipsByInclude(relationships);
+
+		filteredRelationships.forEach((relationship: Resource) => {
 			const relationshipName = relationship.relationshipName || relationship.type;
 
 			if(relationship.id) {
@@ -77,8 +81,21 @@ export class JsonApiResponseBuilder {
 		});
 	}
 
+	private filterRelationshipsByInclude(relationships: Resource[]): Resource[] {
+		if (this.include_filter.length === 0) {
+			return [];
+		}
+
+		return relationships.filter((relationship: Resource) => {
+			const relationshipName = relationship.relationshipName || relationship.type;
+			return this.include_filter.includes(relationshipName);
+		});
+	}
+
 	private addRelationshipsToIncluded(relationships: Resource[] = [], response: JsonApiResponse): void {
-		relationships.forEach((relationship: Resource) => {
+		const filteredRelationships = this.filterRelationshipsByInclude(relationships);
+
+		filteredRelationships.forEach((relationship: Resource) => {
 			const relationshipAlreadyAdded = response.included?.some((resource) => resource.id === relationship.id && resource.type === relationship.type)
 			const relationshipPresent = relationship.id
 
