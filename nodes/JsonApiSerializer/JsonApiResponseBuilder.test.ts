@@ -208,6 +208,67 @@ describe('.buildResponse', () => {
 			});
 		});
 
+		describe('with resource having one-to-many relationship', () => {
+			it('returns the resource relationship and included', () => {
+				const resource = {
+					id: '42',
+					type: 'contact',
+					attributes: {
+						name: 'Mister Daniel',
+					},
+					relationships: [
+						{
+							id: '42',
+							type: 'role',
+							relationshipName: 'roles',
+							relationshipType: 'one-to-many' as const,
+							attributes: {
+								name: 'Contact Point',
+							},
+						},
+						{
+							id: '43',
+							type: 'role',
+							relationshipName: 'roles',
+							relationshipType: 'one-to-many' as const,
+							attributes: {
+								name: 'CEO',
+							},
+						},
+					],
+				};
+				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true, ['roles']);
+
+				expect(builder.buildResponse()).toEqual({
+					data: {
+						id: '42',
+						type: 'contact',
+						attributes: { name: 'Mister Daniel' },
+						relationships: {
+							roles: {
+								data: [
+									{ id: '42', type: 'role' },
+									{ id: '43', type: 'role' },
+								],
+							},
+						},
+					},
+					included: [
+						{
+							id: '42',
+							type: 'role',
+							attributes: { name: 'Contact Point' },
+						},
+						{
+							id: '43',
+							type: 'role',
+							attributes: { name: 'CEO' },
+						},
+					],
+				});
+			});
+		});
+
 		describe('with resource having invalid relationship', () => {
 			it('returns the resource relationship and included', () => {
 				const resource = {
@@ -405,6 +466,82 @@ describe('.buildResponse', () => {
 							type: 'sector',
 							attributes: {
 								name: 'Food Industry',
+							},
+						},
+					],
+				});
+			});
+		});
+
+		describe('with resources having one-to-many relationship', () => {
+			it('returns the resource relationship and included', () => {
+				const resources = [
+					{
+						id: '42',
+						type: 'contact',
+						attributes: {
+							name: 'Mister Daniel',
+						},
+						relationships: [
+							{
+								id: '42',
+								type: 'role',
+								relationshipName: 'roles',
+								relationshipType: 'one-to-many',
+								attributes: {
+									name: 'Contact Point',
+								},
+							},
+							{
+								id: '43',
+								type: 'role',
+								relationshipName: 'roles',
+								relationshipType: 'one-to-many',
+								attributes: {
+									name: 'CEO',
+								},
+							},
+						],
+					},
+				];
+
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources as Resource[], true, ['roles']);
+
+				expect(builder.buildResponse()).toEqual({
+					data: [
+						{
+							id: '42',
+							type: 'contact',
+							attributes: { name: 'Mister Daniel' },
+							relationships: {
+								roles: {
+									data: [
+										{
+											id: '42',
+											type: 'role',
+										},
+										{
+											id: '43',
+											type: 'role',
+										},
+									]
+								},
+							},
+						}
+					],
+					included: [
+						{
+							id: '42',
+							type: 'role',
+							attributes: {
+								name: 'Contact Point',
+							},
+						},
+						{
+							id: '43',
+							type: 'role',
+							attributes: {
+								name: 'CEO',
 							},
 						},
 					],

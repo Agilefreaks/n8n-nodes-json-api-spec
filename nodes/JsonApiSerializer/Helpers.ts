@@ -32,27 +32,43 @@ export function parseAttributes(node: INode, attributes: string): any {
 
 function parseRelationships(context: IExecuteFunctions): Resource[] {
 	const enableIncludeResources = context.getNodeParameter('enable_include_resources', 0, false) as boolean;
-	if (!enableIncludeResources) {
-		return [];
-	}
+	if (!enableIncludeResources) return [];
 
 	const rawIncluded = context.getNodeParameter('included', 0) as any;
-	if (!rawIncluded.resources?.length) {
-		return [];
-	}
+	if (!rawIncluded.resources?.length) return [];
 
-	return rawIncluded.resources.map((includedResource: any) => {
-		const type = includedResource.type;
-		const relationshipName = includedResource.relationshipName;
-		const attributes = parseAttributes(context.getNode(), includedResource.attributes);
-		const id = attributes.id;
-		delete attributes.id;
+	return rawIncluded.resources.flatMap((includedResource: any) =>
+		includedResource.relationshipType === 'one-to-many'
+			? parseOneToManyRelationship(includedResource)
+			: parseOneToOneRelationship(context.getNode(), includedResource)
+	);
+}
 
-		const resource: Resource = { id, type, attributes };
-		if (relationshipName) {
-			resource.relationshipName = relationshipName;
-		}
+function parseOneToOneRelationship(node: INode, raw: any): Resource {
+	const attributes = parseAttributes(node, raw.attributes);
+	const id = attributes.id;
+	delete attributes.id;
 
+	const resource: Resource = { id, type: raw.type, attributes };
+	if (raw.relationshipName) resource.relationshipName = raw.relationshipName;
+	return resource;
+}
+
+function parseOneToManyRelationship(raw: any): Resource[] {
+	const sourceArray: any[] = Array.isArray(raw.sourceArray) ? raw.sourceArray : JSON.parse(raw.sourceArray);
+	const keys: string[] = raw.arrayAttributes
+		? raw.arrayAttributes.split(',').map((k: string) => k.trim()).filter(Boolean)
+		: [];
+
+	return sourceArray.map((item: any) => {
+		const attrs = keys.length > 0
+			? Object.fromEntries(keys.map((k) => [k, item[k]]))
+			: { ...item };
+		const id = String(attrs.id);
+		delete attrs.id;
+
+		const resource: Resource = { id, type: raw.type, attributes: attrs, relationshipType: 'one-to-many' };
+		if (raw.relationshipName) resource.relationshipName = raw.relationshipName;
 		return resource;
 	});
 }

@@ -67,18 +67,29 @@ export class JsonApiResponseBuilder {
 	private addRelationshipsToResource(relationships: Resource[] = [], jsonApiResource: JsonApiResource): void {
 		jsonApiResource.relationships = {};
 
-		const filteredRelationships = this.filterRelationshipsByInclude(relationships);
+		const grouped = this.groupRelationshipsByName(this.filterRelationshipsByInclude(relationships));
 
-		filteredRelationships.forEach((relationship: Resource) => {
-			const relationshipName = relationship.relationshipName || relationship.type;
-
-			if(relationship.id) {
-				jsonApiResource.relationships[relationshipName] = { data: { id: relationship.id, type: relationship.type }};
-			}
-			else {
-				jsonApiResource.relationships[relationshipName] = { data: null };
-			}
+		Object.entries(grouped).forEach(([name, rels]) => {
+			jsonApiResource.relationships[name] = this.serializeRelationshipGroup(rels);
 		});
+	}
+
+	private groupRelationshipsByName(relationships: Resource[]): Record<string, Resource[]> {
+		const grouped: Record<string, Resource[]> = {};
+		relationships.forEach((relationship) => {
+			const name = relationship.relationshipName || relationship.type;
+			if (!grouped[name]) grouped[name] = [];
+			grouped[name].push(relationship);
+		});
+		return grouped;
+	}
+
+	private serializeRelationshipGroup(rels: Resource[]): { data: any } {
+		if (rels[0].relationshipType === 'one-to-many') {
+			return { data: rels.filter((r) => r.id).map((r) => ({ id: r.id, type: r.type })) };
+		}
+		const rel = rels[0];
+		return { data: rel.id ? { id: rel.id, type: rel.type } : null };
 	}
 
 	private filterRelationshipsByInclude(relationships: Resource[]): Resource[] {
@@ -106,7 +117,7 @@ export class JsonApiResponseBuilder {
 	}
 
 	private toIncludedResource(resource: Resource): JsonApiResource {
-		const { relationshipName, relationships, ...includedResource } = resource;
+		const { relationshipName, relationships, relationshipType, ...includedResource } = resource;
 		return includedResource as JsonApiResource;
 	}
 

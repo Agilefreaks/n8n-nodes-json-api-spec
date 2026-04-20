@@ -116,12 +116,46 @@ export class JsonApiSerializer implements INodeType {
 								required: true,
 							},
 							{
+								displayName: 'Relationship Type',
+								name: 'relationshipType',
+								type: 'options',
+								default: 'one-to-one',
+								options: [
+									{ name: 'One to One', value: 'one-to-one' },
+									{ name: 'One to Many', value: 'one-to-many' },
+								],
+							},
+							{
 								displayName: 'Attributes',
 								name: 'attributes',
 								type: 'json',
 								default: '',
 								description: 'Attributes of the included resource',
 								required: true,
+								displayOptions: {
+									show: { relationshipType: ['one-to-one'] },
+								},
+							},
+							{
+								displayName: 'Source Array',
+								name: 'sourceArray',
+								type: 'json',
+								default: '',
+								description: 'Expression that resolves to an array of objects',
+								required: true,
+								displayOptions: {
+									show: { relationshipType: ['one-to-many'] },
+								},
+							},
+							{
+								displayName: 'Attribute Keys',
+								name: 'arrayAttributes',
+								type: 'string',
+								default: '',
+								description: 'Comma-separated attribute names to extract from each array item (e.g. id,name). Leave empty to include all.',
+								displayOptions: {
+									show: { relationshipType: ['one-to-many'] },
+								},
 							},
 						],
 					},

@@ -4,6 +4,7 @@ export interface Resource {
 	attributes: any;
 	relationships?: Resource[];
 	relationshipName?: string;
+	relationshipType?: 'one-to-one' | 'one-to-many';
 }
 
 export interface PaginationConfig {
