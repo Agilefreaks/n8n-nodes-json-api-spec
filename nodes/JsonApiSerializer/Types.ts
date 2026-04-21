@@ -2,9 +2,13 @@ export interface Resource {
 	id: string;
 	type: string;
 	attributes: any;
-	relationships?: Resource[];
-	relationshipName?: string;
-	relationshipType?: 'one-to-one' | 'one-to-many';
+	relationships?: Relationship[];
+}
+
+export interface Relationship {
+	name: string;
+	relationshipType: 'one-to-one' | 'one-to-many';
+	resources: Resource[];
 }
 
 export interface PaginationConfig {

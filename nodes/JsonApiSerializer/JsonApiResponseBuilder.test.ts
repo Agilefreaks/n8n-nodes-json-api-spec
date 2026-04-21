@@ -1,5 +1,5 @@
 import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
-import { PaginationConfig, Resource, ResponseType } from './Types';
+import { PaginationConfig, ResponseType } from './Types';
 
 describe('.buildResponse', () => {
 	describe('with object type', () => {
@@ -40,11 +40,9 @@ describe('.buildResponse', () => {
 					},
 					relationships: [
 						{
-							id: '42',
-							type: 'sector',
-							attributes: {
-								name: 'Technology',
-							},
+							name: 'sector',
+							relationshipType: 'one-to-one' as const,
+							resources: [{ id: '42', type: 'sector', attributes: { name: 'Technology' } }],
 						},
 					],
 				};
@@ -93,18 +91,14 @@ describe('.buildResponse', () => {
 					},
 					relationships: [
 						{
-							id: '42',
-							type: 'sector',
-							attributes: {
-								name: 'Technology',
-							},
+							name: 'sector',
+							relationshipType: 'one-to-one' as const,
+							resources: [{ id: '42', type: 'sector', attributes: { name: 'Technology' } }],
 						},
 						{
-							id: '42',
-							type: 'owner',
-							attributes: {
-								name: 'Boss',
-							},
+							name: 'owner',
+							relationshipType: 'one-to-one' as const,
+							resources: [{ id: '42', type: 'owner', attributes: { name: 'Boss' } }],
 						},
 					],
 				};
@@ -164,14 +158,15 @@ describe('.buildResponse', () => {
 					},
 					relationships: [
 						{
-							id: '42',
-							type: 'organization',
-							relationshipName: 'membership',
-							attributes: {
-								name: 'Agile Freaks SRL',
-								country: 'Romania',
-								region: 'Sibiu'
-							},
+							name: 'membership',
+							relationshipType: 'one-to-one' as const,
+							resources: [
+								{
+									id: '42',
+									type: 'organization',
+									attributes: { name: 'Agile Freaks SRL', country: 'Romania', region: 'Sibiu' },
+								},
+							],
 						},
 					],
 				};
@@ -218,22 +213,12 @@ describe('.buildResponse', () => {
 					},
 					relationships: [
 						{
-							id: '42',
-							type: 'role',
-							relationshipName: 'roles',
+							name: 'roles',
 							relationshipType: 'one-to-many' as const,
-							attributes: {
-								name: 'Contact Point',
-							},
-						},
-						{
-							id: '43',
-							type: 'role',
-							relationshipName: 'roles',
-							relationshipType: 'one-to-many' as const,
-							attributes: {
-								name: 'CEO',
-							},
+							resources: [
+								{ id: '42', type: 'role', attributes: { name: 'Contact Point' } },
+								{ id: '43', type: 'role', attributes: { name: 'CEO' } },
+							],
 						},
 					],
 				};
@@ -281,14 +266,12 @@ describe('.buildResponse', () => {
 					},
 					relationships: [
 						{
-							id: null,
-							type: 'sector',
-							attributes: {
-								name: null,
-							},
+							name: 'sector',
+							relationshipType: 'one-to-one' as const,
+							resources: [{ id: null as any, type: 'sector', attributes: { name: null } }],
 						},
 					],
-				} as unknown as Resource;
+				};
 				const builder = new JsonApiResponseBuilder(ResponseType.OBJECT, [resource], true, ['sector']);
 
 				expect(builder.buildResponse()).toEqual({
@@ -363,13 +346,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
 						],
 					},
 					{
@@ -377,13 +354,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{
-								id: '2',
-								type: 'sector',
-								attributes: {
-									name: 'Software',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '2', type: 'sector', attributes: { name: 'Software' } }] },
 						],
 					},
 					{
@@ -391,13 +362,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{
-								id: '3',
-								type: 'sector',
-								attributes: {
-									name: 'Food Industry',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '3', type: 'sector', attributes: { name: 'Food Industry' } }] },
 						],
 					},
 				];
@@ -484,28 +449,18 @@ describe('.buildResponse', () => {
 						},
 						relationships: [
 							{
-								id: '42',
-								type: 'role',
-								relationshipName: 'roles',
-								relationshipType: 'one-to-many',
-								attributes: {
-									name: 'Contact Point',
-								},
-							},
-							{
-								id: '43',
-								type: 'role',
-								relationshipName: 'roles',
-								relationshipType: 'one-to-many',
-								attributes: {
-									name: 'CEO',
-								},
+								name: 'roles',
+								relationshipType: 'one-to-many' as const,
+								resources: [
+									{ id: '42', type: 'role', attributes: { name: 'Contact Point' } },
+									{ id: '43', type: 'role', attributes: { name: 'CEO' } },
+								],
 							},
 						],
 					},
 				];
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources as Resource[], true, ['roles']);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true, ['roles']);
 
 				expect(builder.buildResponse()).toEqual({
 					data: [
@@ -558,18 +513,12 @@ describe('.buildResponse', () => {
 						attributes: { name: 'First Contact' },
 						relationships: [
 							{
-								id: '64',
-								type: 'role',
-								relationshipName: 'roles',
+								name: 'roles',
 								relationshipType: 'one-to-many' as const,
-								attributes: { name: 'Contact point' },
-							},
-							{
-								id: '65',
-								type: 'role',
-								relationshipName: 'roles',
-								relationshipType: 'one-to-many' as const,
-								attributes: { name: 'CEO' },
+								resources: [
+									{ id: '64', type: 'role', attributes: { name: 'Contact point' } },
+									{ id: '65', type: 'role', attributes: { name: 'CEO' } },
+								],
 							},
 						],
 					},
@@ -577,10 +526,17 @@ describe('.buildResponse', () => {
 						id: '353',
 						type: 'contact',
 						attributes: { name: 'Second Contact' },
+						relationships: [
+							{
+								name: 'roles',
+								relationshipType: 'one-to-many' as const,
+								resources: [],
+							},
+						],
 					},
 				];
 
-				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources as Resource[], true, ['roles']);
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources, true, ['roles']);
 
 				expect(builder.buildResponse()).toEqual({
 					data: [
@@ -601,7 +557,9 @@ describe('.buildResponse', () => {
 							id: '353',
 							type: 'contact',
 							attributes: { name: 'Second Contact' },
-							relationships: {},
+							relationships: {
+								roles: { data: [] },
+							},
 						},
 					],
 					included: [
@@ -620,20 +578,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
-							{
-								id: '1',
-								type: 'owner',
-								attributes: {
-									name: 'Boss',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 					{
@@ -641,20 +587,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
-							{
-								id: '1',
-								type: 'owner',
-								attributes: {
-									name: 'Boss',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 					{
@@ -662,20 +596,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
-							{
-								id: '1',
-								type: 'owner',
-								attributes: {
-									name: 'Boss',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 				];
@@ -745,13 +667,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
 						],
 					},
 					{
@@ -759,13 +675,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
 						],
 					},
 					{
@@ -773,13 +683,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
 						],
 					},
 				];
@@ -849,20 +753,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
-							{
-								id: '1',
-								type: 'owner',
-								attributes: {
-									name: 'Boss',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 					{
@@ -870,20 +762,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
-							{
-								id: '1',
-								type: 'owner',
-								attributes: {
-									name: 'Boss',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 					{
@@ -891,20 +771,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
-							{
-								id: '1',
-								type: 'owner',
-								attributes: {
-									name: 'Boss',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 				];
@@ -1157,13 +1025,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 						relationships: [
-							{
-								id: '1',
-								type: 'sector',
-								attributes: {
-									name: 'Technology',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
 						],
 					},
 					{
@@ -1171,13 +1033,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{
-								id: '2',
-								type: 'sector',
-								attributes: {
-									name: 'Software',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '2', type: 'sector', attributes: { name: 'Software' } }] },
 						],
 					},
 					{
@@ -1185,13 +1041,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{
-								id: '3',
-								type: 'sector',
-								attributes: {
-									name: 'Food Industry',
-								},
-							},
+							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '3', type: 'sector', attributes: { name: 'Food Industry' } }] },
 						],
 					},
 				];
