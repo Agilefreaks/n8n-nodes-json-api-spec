@@ -549,6 +549,69 @@ describe('.buildResponse', () => {
 			});
 		});
 
+		describe('with resources where only some have one-to-many relationships', () => {
+			it('only returns relationships for resources that have them', () => {
+				const resources = [
+					{
+						id: '352',
+						type: 'contact',
+						attributes: { name: 'First Contact' },
+						relationships: [
+							{
+								id: '64',
+								type: 'role',
+								relationshipName: 'roles',
+								relationshipType: 'one-to-many' as const,
+								attributes: { name: 'Contact point' },
+							},
+							{
+								id: '65',
+								type: 'role',
+								relationshipName: 'roles',
+								relationshipType: 'one-to-many' as const,
+								attributes: { name: 'CEO' },
+							},
+						],
+					},
+					{
+						id: '353',
+						type: 'contact',
+						attributes: { name: 'Second Contact' },
+					},
+				];
+
+				const builder = new JsonApiResponseBuilder(ResponseType.ARRAY, resources as Resource[], true, ['roles']);
+
+				expect(builder.buildResponse()).toEqual({
+					data: [
+						{
+							id: '352',
+							type: 'contact',
+							attributes: { name: 'First Contact' },
+							relationships: {
+								roles: {
+									data: [
+										{ id: '64', type: 'role' },
+										{ id: '65', type: 'role' },
+									],
+								},
+							},
+						},
+						{
+							id: '353',
+							type: 'contact',
+							attributes: { name: 'Second Contact' },
+							relationships: {},
+						},
+					],
+					included: [
+						{ id: '64', type: 'role', attributes: { name: 'Contact point' } },
+						{ id: '65', type: 'role', attributes: { name: 'CEO' } },
+					],
+				});
+			});
+		});
+
 		describe('with resources having selected includes', () => {
 			it('returns the resource relationship and included', () => {
 				const resources = [

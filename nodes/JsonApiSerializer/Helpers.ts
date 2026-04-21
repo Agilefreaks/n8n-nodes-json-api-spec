@@ -11,7 +11,7 @@ export function parseResource(context: IExecuteFunctions, index: number): Resour
 	}
 
 	const attributes = parseAttributes(context.getNode(), resourceAttributes);
-	const relationships = parseRelationships(context);
+	const relationships = parseRelationships(context, index);
 
 	const resource: Resource = { id, type, attributes };
 
@@ -30,11 +30,11 @@ export function parseAttributes(node: INode, attributes: string): any {
 	}
 }
 
-function parseRelationships(context: IExecuteFunctions): Resource[] {
+function parseRelationships(context: IExecuteFunctions, index: number): Resource[] {
 	const enableIncludeResources = context.getNodeParameter('enable_include_resources', 0, false) as boolean;
 	if (!enableIncludeResources) return [];
 
-	const rawIncluded = context.getNodeParameter('included', 0) as any;
+	const rawIncluded = context.getNodeParameter('included', index) as any;
 	if (!rawIncluded.resources?.length) return [];
 
 	return rawIncluded.resources.flatMap((includedResource: any) =>
@@ -55,6 +55,7 @@ function parseOneToOneRelationship(node: INode, raw: any): Resource {
 }
 
 function parseOneToManyRelationship(raw: any): Resource[] {
+	if (!raw.sourceArray) return [];
 	const sourceArray: any[] = Array.isArray(raw.sourceArray) ? raw.sourceArray : JSON.parse(raw.sourceArray);
 	const keys: string[] = raw.arrayAttributes
 		? raw.arrayAttributes.split(',').map((k: string) => k.trim()).filter(Boolean)
