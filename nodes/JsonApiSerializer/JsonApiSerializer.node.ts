@@ -5,7 +5,7 @@ import {
 	type INodeTypeDescription,
 } from 'n8n-workflow';
 import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
-import { PaginationConfig, Resource, ResponseType } from './Types';
+import { PaginationConfig, RelationshipType, Resource, ResponseType } from './Types';
 import { parseResource } from './Helpers';
 
 export class JsonApiSerializer implements INodeType {
@@ -119,10 +119,10 @@ export class JsonApiSerializer implements INodeType {
 								displayName: 'Relationship Type',
 								name: 'relationshipType',
 								type: 'options',
-								default: 'one-to-one',
+								default: RelationshipType.ONE_TO_ONE,
 								options: [
-									{ name: 'One to One', value: 'one-to-one' },
-									{ name: 'One to Many', value: 'one-to-many' },
+									{ name: 'One to One', value: RelationshipType.ONE_TO_ONE },
+									{ name: 'One to Many', value: RelationshipType.ONE_TO_MANY },
 								],
 							},
 							{
@@ -152,7 +152,7 @@ export class JsonApiSerializer implements INodeType {
 								name: 'arrayAttributes',
 								type: 'string',
 								default: '',
-								description: 'Comma-separated attribute names to extract from each array item (e.g. id,name). Leave empty to include all.',
+								description: 'Comma-separated attribute names to extract from each array item (e.g. ID,name). Leave empty to include all.',
 								displayOptions: {
 									show: { relationshipType: ['one-to-many'] },
 								},

@@ -44,7 +44,7 @@ When "Enable Include Relationships" is enabled, you can use the **Include Filter
 
 - **Include Filter**: A comma-separated list of relationship names to include (e.g., `sector,owner`)
 - If empty, no relationships or included resources will be returned
-- The filter matches against the relationship name (or type if no custom name is set)
+- The filter matches against the **Relationship Name** configured on each included resource
 - Default value pulls from `$('Webhook').first().json.query.include` to automatically use the `include` parameter from incoming API requests
 
 ### Pagination Support (Array Only)
@@ -123,6 +123,8 @@ When serializing an array of resources, you can enable pagination to add JSON AP
 - Include Resources:
   - Resource:
     - Type: `sector`
+    - Relationship Name: `sector`
+    - Relationship Type: `One to One` (default)
     - Attributes: `{"id": "1", "name": "Technology"}`
 
 **Output:**
@@ -172,10 +174,12 @@ This example shows how to filter which relationships are returned. When you have
 	- Resource:
 		- Type: `sector`
 		- Relationship Name: `sector`
+		- Relationship Type: `One to One` (default)
 		- Attributes: `{"id": "1", "name": "Technology"}`
 	- Resource:
 		- Type: `owner`
 		- Relationship Name: `owner`
+		- Relationship Type: `One to One` (default)
 		- Attributes: `{"id": "1", "name": "Boss"}`
 
 **Output:**
@@ -224,9 +228,13 @@ Note that even though both `sector` and `owner` are configured as Include Resour
 - Include Resources:
   - Resource:
     - Type: `sector`
+    - Relationship Name: `sector`
+    - Relationship Type: `One to One` (default)
     - Attributes: `{"id": "1", "name": "Technology"}`
   - Resource:
     - Type: `owner`
+    - Relationship Name: `owner`
+    - Relationship Type: `One to One` (default)
     - Attributes: `{"id": "1", "name": "Boss"}`
 
 **Output:**
@@ -289,6 +297,7 @@ You can specify a custom name for relationships that differs from the resource t
   - Resource:
     - Type: `organization`
     - Relationship Name: `membership`
+    - Relationship Type: `One to One` (default)
     - Attributes: `{"id": "42", "name": "Agile Freaks SRL", "country": "Romania", "region": "Sibiu"}`
 
 **Output:**
@@ -445,11 +454,12 @@ Use **Relationship Type: One to Many** when a resource has multiple related item
 ### Tips
 - The **Attributes** field accepts JSON format - make sure your JSON is valid
 - The **Include Resources** field is optional. Add one or more resources that will appear in both the `relationships` and `included` sections
-  - Each included resource requires a **Type** and a **Relationship Name**
+  - Each included resource requires a **Type**, a **Relationship Name**, and a **Relationship Type**
   - **Relationship Type** controls the output format:
-    - `One to One` (default): provide **Attributes** as a JSON object including an `id` field
-    - `One to Many`: provide a **Source Array** expression and an optional **Attribute Keys** list — each array item becomes a separate relationship entry
-  - The `id` field is always extracted from each resource and used for the relationship reference, not included in `attributes`
+    - `One to One` (default): provide **Attributes** as a JSON object including an `id` field. Outputs `{ "data": { "id": "…", "type": "…" } }`
+    - `One to Many`: provide a **Source Array** expression and an optional **Attribute Keys** list. Outputs `{ "data": [ … ] }` — always an array, even when empty
+  - The `id` field is always extracted from each resource and used as the relationship identifier — it will not appear in `attributes`
+  - Empty to-many relationships (`data: []`) are valid per the JSON API spec and will be included in the output
 - Use the **Resource Object** response type when you need to serialize a single item
 - Use the **Resources Array** response type when working with multiple items from previous nodes
 - The node follows the [JSON API v1.0 specification](https://jsonapi.org/format/)

@@ -1,5 +1,5 @@
 import { NodeOperationError, type INode, type IExecuteFunctions } from 'n8n-workflow';
-import { Relationship, Resource } from './Types';
+import { Relationship, RelationshipType, Resource } from './Types';
 
 export function parseResource(context: IExecuteFunctions, index: number): Resource | undefined {
 	const type = context.getNodeParameter('resource_type', index) as string;
@@ -38,7 +38,7 @@ function parseRelationships(context: IExecuteFunctions, index: number): Relation
 	if (!rawIncluded.resources?.length) return [];
 
 	return rawIncluded.resources.map((includedResource: any) =>
-		includedResource.relationshipType === 'one-to-many'
+		includedResource.relationshipType === RelationshipType.ONE_TO_MANY
 			? parseOneToManyRelationship(includedResource)
 			: parseOneToOneRelationship(context.getNode(), includedResource)
 	);
@@ -51,7 +51,7 @@ function parseOneToOneRelationship(node: INode, raw: any): Relationship {
 
 	return {
 		name: raw.relationshipName || raw.type,
-		relationshipType: 'one-to-one',
+		relationshipType: RelationshipType.ONE_TO_ONE,
 		resources: [{ id, type: raw.type, attributes }],
 	};
 }
@@ -76,7 +76,7 @@ function parseOneToManyRelationship(raw: any): Relationship {
 
 	return {
 		name: raw.relationshipName || raw.type,
-		relationshipType: 'one-to-many',
+		relationshipType: RelationshipType.ONE_TO_MANY,
 		resources,
 	};
 }

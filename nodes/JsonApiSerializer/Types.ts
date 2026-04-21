@@ -7,7 +7,7 @@ export interface Resource {
 
 export interface Relationship {
 	name: string;
-	relationshipType: 'one-to-one' | 'one-to-many';
+	relationshipType: RelationshipType;
 	resources: Resource[];
 }
 
@@ -48,6 +48,11 @@ export interface JsonApiResource {
 	type: string;
 	attributes: any;
 	relationships?: any;
+}
+
+export enum RelationshipType {
+	ONE_TO_ONE = 'one-to-one',
+	ONE_TO_MANY = 'one-to-many',
 }
 
 export enum ResponseType {

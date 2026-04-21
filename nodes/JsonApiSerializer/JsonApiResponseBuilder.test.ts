@@ -1,5 +1,5 @@
 import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
-import { PaginationConfig, ResponseType } from './Types';
+import { PaginationConfig, RelationshipType, ResponseType } from './Types';
 
 describe('.buildResponse', () => {
 	describe('with object type', () => {
@@ -41,7 +41,7 @@ describe('.buildResponse', () => {
 					relationships: [
 						{
 							name: 'sector',
-							relationshipType: 'one-to-one' as const,
+							relationshipType: RelationshipType.ONE_TO_ONE,
 							resources: [{ id: '42', type: 'sector', attributes: { name: 'Technology' } }],
 						},
 					],
@@ -92,12 +92,12 @@ describe('.buildResponse', () => {
 					relationships: [
 						{
 							name: 'sector',
-							relationshipType: 'one-to-one' as const,
+							relationshipType: RelationshipType.ONE_TO_ONE,
 							resources: [{ id: '42', type: 'sector', attributes: { name: 'Technology' } }],
 						},
 						{
 							name: 'owner',
-							relationshipType: 'one-to-one' as const,
+							relationshipType: RelationshipType.ONE_TO_ONE,
 							resources: [{ id: '42', type: 'owner', attributes: { name: 'Boss' } }],
 						},
 					],
@@ -159,7 +159,7 @@ describe('.buildResponse', () => {
 					relationships: [
 						{
 							name: 'membership',
-							relationshipType: 'one-to-one' as const,
+							relationshipType: RelationshipType.ONE_TO_ONE,
 							resources: [
 								{
 									id: '42',
@@ -214,7 +214,7 @@ describe('.buildResponse', () => {
 					relationships: [
 						{
 							name: 'roles',
-							relationshipType: 'one-to-many' as const,
+							relationshipType: RelationshipType.ONE_TO_MANY,
 							resources: [
 								{ id: '42', type: 'role', attributes: { name: 'Contact Point' } },
 								{ id: '43', type: 'role', attributes: { name: 'CEO' } },
@@ -267,7 +267,7 @@ describe('.buildResponse', () => {
 					relationships: [
 						{
 							name: 'sector',
-							relationshipType: 'one-to-one' as const,
+							relationshipType: RelationshipType.ONE_TO_ONE,
 							resources: [{ id: null as any, type: 'sector', attributes: { name: null } }],
 						},
 					],
@@ -346,7 +346,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
 						],
 					},
 					{
@@ -354,7 +354,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '2', type: 'sector', attributes: { name: 'Software' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '2', type: 'sector', attributes: { name: 'Software' } }] },
 						],
 					},
 					{
@@ -362,7 +362,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '3', type: 'sector', attributes: { name: 'Food Industry' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '3', type: 'sector', attributes: { name: 'Food Industry' } }] },
 						],
 					},
 				];
@@ -450,7 +450,7 @@ describe('.buildResponse', () => {
 						relationships: [
 							{
 								name: 'roles',
-								relationshipType: 'one-to-many' as const,
+								relationshipType: RelationshipType.ONE_TO_MANY,
 								resources: [
 									{ id: '42', type: 'role', attributes: { name: 'Contact Point' } },
 									{ id: '43', type: 'role', attributes: { name: 'CEO' } },
@@ -514,7 +514,7 @@ describe('.buildResponse', () => {
 						relationships: [
 							{
 								name: 'roles',
-								relationshipType: 'one-to-many' as const,
+								relationshipType: RelationshipType.ONE_TO_MANY,
 								resources: [
 									{ id: '64', type: 'role', attributes: { name: 'Contact point' } },
 									{ id: '65', type: 'role', attributes: { name: 'CEO' } },
@@ -529,7 +529,7 @@ describe('.buildResponse', () => {
 						relationships: [
 							{
 								name: 'roles',
-								relationshipType: 'one-to-many' as const,
+								relationshipType: RelationshipType.ONE_TO_MANY,
 								resources: [],
 							},
 						],
@@ -578,8 +578,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
-							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 					{
@@ -587,8 +587,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
-							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 					{
@@ -596,8 +596,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
-							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 				];
@@ -667,7 +667,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
 						],
 					},
 					{
@@ -675,7 +675,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
 						],
 					},
 					{
@@ -683,7 +683,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
 						],
 					},
 				];
@@ -753,8 +753,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
-							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 					{
@@ -762,8 +762,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
-							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 					{
@@ -771,8 +771,8 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
-							{ name: 'owner', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'owner', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'owner', attributes: { name: 'Boss' } }] },
 						],
 					},
 				];
@@ -1025,7 +1025,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'USA' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '1', type: 'sector', attributes: { name: 'Technology' } }] },
 						],
 					},
 					{
@@ -1033,7 +1033,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '2', type: 'sector', attributes: { name: 'Software' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '2', type: 'sector', attributes: { name: 'Software' } }] },
 						],
 					},
 					{
@@ -1041,7 +1041,7 @@ describe('.buildResponse', () => {
 						type: 'organization',
 						attributes: { name: 'Agile Freaks SRL', country: 'Germany' },
 						relationships: [
-							{ name: 'sector', relationshipType: 'one-to-one' as const, resources: [{ id: '3', type: 'sector', attributes: { name: 'Food Industry' } }] },
+							{ name: 'sector', relationshipType: RelationshipType.ONE_TO_ONE, resources: [{ id: '3', type: 'sector', attributes: { name: 'Food Industry' } }] },
 						],
 					},
 				];

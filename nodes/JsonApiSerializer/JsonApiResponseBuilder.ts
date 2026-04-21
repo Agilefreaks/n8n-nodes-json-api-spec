@@ -1,4 +1,4 @@
-import { JsonApiLinks, JsonApiMeta, JsonApiResource, JsonApiResponse, PaginationConfig, Relationship, Resource, ResponseType } from './Types';
+import { JsonApiLinks, JsonApiMeta, JsonApiResource, JsonApiResponse, PaginationConfig, Relationship, RelationshipType, Resource, ResponseType } from './Types';
 
 export class JsonApiResponseBuilder {
 	response_type: ResponseType;
@@ -68,7 +68,7 @@ export class JsonApiResponseBuilder {
 		jsonApiResource.relationships = {};
 
 		this.filterRelationshipsByInclude(relationships).forEach(({ name, relationshipType, resources }) => {
-			jsonApiResource.relationships[name] = relationshipType === 'one-to-many'
+			jsonApiResource.relationships[name] = relationshipType === RelationshipType.ONE_TO_MANY
 				? { data: resources.map((r) => ({ id: r.id, type: r.type })) }
 				: { data: resources[0]?.id ? { id: resources[0].id, type: resources[0].type } : null };
 		});
