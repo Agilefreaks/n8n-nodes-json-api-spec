@@ -1,4 +1,4 @@
-import { JsonApiLinks, JsonApiMeta, JsonApiResource, JsonApiResponse, PaginationConfig, Resource, ResponseType } from './Types';
+import { JsonApiLinks, JsonApiMeta, JsonApiResource, JsonApiResponse, PaginationConfig, Relationship, RelationshipType, Resource, ResponseType } from './Types';
 
 export class JsonApiResponseBuilder {
 	response_type: ResponseType;
@@ -64,50 +64,30 @@ export class JsonApiResponseBuilder {
 		return { id: resource.id, type: resource.type, attributes: resource.attributes } as JsonApiResource;
 	}
 
-	private addRelationshipsToResource(relationships: Resource[] = [], jsonApiResource: JsonApiResource): void {
+	private addRelationshipsToResource(relationships: Relationship[] = [], jsonApiResource: JsonApiResource): void {
 		jsonApiResource.relationships = {};
 
-		const filteredRelationships = this.filterRelationshipsByInclude(relationships);
-
-		filteredRelationships.forEach((relationship: Resource) => {
-			const relationshipName = relationship.relationshipName || relationship.type;
-
-			if(relationship.id) {
-				jsonApiResource.relationships[relationshipName] = { data: { id: relationship.id, type: relationship.type }};
-			}
-			else {
-				jsonApiResource.relationships[relationshipName] = { data: null };
-			}
+		this.filterRelationshipsByInclude(relationships).forEach(({ name, relationshipType, resources }) => {
+			jsonApiResource.relationships[name] = relationshipType === RelationshipType.ONE_TO_MANY
+				? { data: resources.map((r) => ({ id: r.id, type: r.type })) }
+				: { data: resources[0]?.id ? { id: resources[0].id, type: resources[0].type } : null };
 		});
 	}
 
-	private filterRelationshipsByInclude(relationships: Resource[]): Resource[] {
-		if (this.include_filter.length === 0) {
-			return [];
-		}
-
-		return relationships.filter((relationship: Resource) => {
-			const relationshipName = relationship.relationshipName || relationship.type;
-			return this.include_filter.includes(relationshipName);
-		});
+	private filterRelationshipsByInclude(relationships: Relationship[]): Relationship[] {
+		if (this.include_filter.length === 0) return [];
+		return relationships.filter(({ name }) => this.include_filter.includes(name));
 	}
 
-	private addRelationshipsToIncluded(relationships: Resource[] = [], response: JsonApiResponse): void {
-		const filteredRelationships = this.filterRelationshipsByInclude(relationships);
-
-		filteredRelationships.forEach((relationship: Resource) => {
-			const relationshipAlreadyAdded = response.included?.some((resource) => resource.id === relationship.id && resource.type === relationship.type)
-			const relationshipPresent = relationship.id
-
-			if (relationshipPresent && !relationshipAlreadyAdded) {
-				response.included?.push(this.toIncludedResource(relationship));
-			}
+	private addRelationshipsToIncluded(relationships: Relationship[] = [], response: JsonApiResponse): void {
+		this.filterRelationshipsByInclude(relationships).forEach(({ resources }) => {
+			resources.forEach((resource) => {
+				const alreadyAdded = response.included?.some((r) => r.id === resource.id && r.type === resource.type);
+				if (resource.id && !alreadyAdded) {
+					response.included?.push({ id: resource.id, type: resource.type, attributes: resource.attributes });
+				}
+			});
 		});
-	}
-
-	private toIncludedResource(resource: Resource): JsonApiResource {
-		const { relationshipName, relationships, ...includedResource } = resource;
-		return includedResource as JsonApiResource;
 	}
 
 	private buildPageUrl(page: number): string {

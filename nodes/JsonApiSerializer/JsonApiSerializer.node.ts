@@ -5,7 +5,7 @@ import {
 	type INodeTypeDescription,
 } from 'n8n-workflow';
 import { JsonApiResponseBuilder } from './JsonApiResponseBuilder';
-import { PaginationConfig, Resource, ResponseType } from './Types';
+import { PaginationConfig, RelationshipType, Resource, ResponseType } from './Types';
 import { parseResource } from './Helpers';
 
 export class JsonApiSerializer implements INodeType {
@@ -100,12 +100,25 @@ export class JsonApiSerializer implements INodeType {
 						name: 'resources',
 						values: [
 							{
-								displayName: 'Type',
-								name: 'type',
+								displayName: 'Attribute Keys',
+								name: 'arrayAttributes',
 								type: 'string',
 								default: '',
-								description: 'Name of the included resource',
+								description: 'Comma-separated attribute names to extract from each array item (e.g. ID,name). Leave empty to include all.',
+								displayOptions: {
+									show: { relationshipType: ['one-to-many'] },
+								},
+							},
+							{
+								displayName: 'Attributes',
+								name: 'attributes',
+								type: 'json',
+								default: '',
+								description: 'Attributes of the included resource',
 								required: true,
+								displayOptions: {
+									show: { relationshipType: ['one-to-one'] },
+								},
 							},
 							{
 								displayName: 'Relationship Name',
@@ -116,11 +129,32 @@ export class JsonApiSerializer implements INodeType {
 								required: true,
 							},
 							{
-								displayName: 'Attributes',
-								name: 'attributes',
+								displayName: 'Relationship Type',
+								name: 'relationshipType',
+								type: 'options',
+								default: 'one-to-one',
+								options: [
+									{ name: 'One to One', value: RelationshipType.ONE_TO_ONE },
+									{ name: 'One to Many', value: RelationshipType.ONE_TO_MANY },
+								],
+							},
+							{
+								displayName: 'Source Array',
+								name: 'sourceArray',
 								type: 'json',
 								default: '',
-								description: 'Attributes of the included resource',
+								description: 'Expression that resolves to an array of objects',
+								required: true,
+								displayOptions: {
+									show: { relationshipType: ['one-to-many'] },
+								},
+							},
+							{
+								displayName: 'Type',
+								name: 'type',
+								type: 'string',
+								default: '',
+								description: 'Name of the included resource',
 								required: true,
 							},
 						],

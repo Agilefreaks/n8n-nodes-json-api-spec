@@ -1,5 +1,5 @@
 import { NodeOperationError, type INode, type IExecuteFunctions } from 'n8n-workflow';
-import { Resource } from './Types';
+import { Relationship, RelationshipType, Resource } from './Types';
 
 export function parseResource(context: IExecuteFunctions, index: number): Resource | undefined {
 	const type = context.getNodeParameter('resource_type', index) as string;
@@ -11,7 +11,7 @@ export function parseResource(context: IExecuteFunctions, index: number): Resour
 	}
 
 	const attributes = parseAttributes(context.getNode(), resourceAttributes);
-	const relationships = parseRelationships(context);
+	const relationships = parseRelationships(context, index);
 
 	const resource: Resource = { id, type, attributes };
 
@@ -30,29 +30,53 @@ export function parseAttributes(node: INode, attributes: string): any {
 	}
 }
 
-function parseRelationships(context: IExecuteFunctions): Resource[] {
+function parseRelationships(context: IExecuteFunctions, index: number): Relationship[] {
 	const enableIncludeResources = context.getNodeParameter('enable_include_resources', 0, false) as boolean;
-	if (!enableIncludeResources) {
-		return [];
-	}
+	if (!enableIncludeResources) return [];
 
-	const rawIncluded = context.getNodeParameter('included', 0) as any;
-	if (!rawIncluded.resources?.length) {
-		return [];
-	}
+	const rawIncluded = context.getNodeParameter('included', index) as any;
+	if (!rawIncluded.resources?.length) return [];
 
-	return rawIncluded.resources.map((includedResource: any) => {
-		const type = includedResource.type;
-		const relationshipName = includedResource.relationshipName;
-		const attributes = parseAttributes(context.getNode(), includedResource.attributes);
-		const id = attributes.id;
-		delete attributes.id;
+	return rawIncluded.resources.map((includedResource: any) =>
+		includedResource.relationshipType === RelationshipType.ONE_TO_MANY
+			? parseOneToManyRelationship(includedResource)
+			: parseOneToOneRelationship(context.getNode(), includedResource)
+	);
+}
 
-		const resource: Resource = { id, type, attributes };
-		if (relationshipName) {
-			resource.relationshipName = relationshipName;
-		}
+function parseOneToOneRelationship(node: INode, raw: any): Relationship {
+	const attributes = parseAttributes(node, raw.attributes);
+	const id = attributes.id;
+	delete attributes.id;
 
-		return resource;
+	return {
+		name: raw.relationshipName || raw.type,
+		relationshipType: RelationshipType.ONE_TO_ONE,
+		resources: [{ id, type: raw.type, attributes }],
+	};
+}
+
+function parseOneToManyRelationship(raw: any): Relationship {
+	const sourceArray: any[] = Array.isArray(raw.sourceArray)
+		? raw.sourceArray
+		: raw.sourceArray ? JSON.parse(raw.sourceArray) : [];
+
+	const keys: string[] = raw.arrayAttributes
+		? raw.arrayAttributes.split(',').map((k: string) => k.trim()).filter(Boolean)
+		: [];
+
+	const resources = sourceArray.map((item: any) => {
+		const attrs = keys.length > 0
+			? Object.fromEntries(keys.map((k) => [k, item[k]]))
+			: { ...item };
+		const id = String(attrs.id);
+		delete attrs.id;
+		return { id, type: raw.type, attributes: attrs } as Resource;
 	});
+
+	return {
+		name: raw.relationshipName || raw.type,
+		relationshipType: RelationshipType.ONE_TO_MANY,
+		resources,
+	};
 }

@@ -35,12 +35,16 @@ Serializes multiple resources into JSON API format with a `data` array, where ea
 ### Serialize Resource Object and Array with Relationships
 Enable Include Relationships will add `data.relationships` and `included` keys with the resources provided.
 
+Each included resource supports two relationship types:
+- **One to One** (default) — emits a single resource identifier object: `{ "data": { "id": "1", "type": "sector" } }`
+- **One to Many** — emits an array of resource identifiers: `{ "data": [{ "id": "1", "type": "role" }, { "id": "2", "type": "role" }] }`
+
 ### Include Filter
 When "Enable Include Relationships" is enabled, you can use the **Include Filter** field to control which relationships are returned in the response. This is useful for implementing the JSON API `include` query parameter pattern.
 
 - **Include Filter**: A comma-separated list of relationship names to include (e.g., `sector,owner`)
 - If empty, no relationships or included resources will be returned
-- The filter matches against the relationship name (or type if no custom name is set)
+- The filter matches against the **Relationship Name** configured on each included resource
 - Default value pulls from `$('Webhook').first().json.query.include` to automatically use the `include` parameter from incoming API requests
 
 ### Pagination Support (Array Only)
@@ -119,6 +123,8 @@ When serializing an array of resources, you can enable pagination to add JSON AP
 - Include Resources:
   - Resource:
     - Type: `sector`
+    - Relationship Name: `sector`
+    - Relationship Type: `One to One` (default)
     - Attributes: `{"id": "1", "name": "Technology"}`
 
 **Output:**
@@ -134,8 +140,10 @@ When serializing an array of resources, you can enable pagination to add JSON AP
     },
     "relationships": {
       "sector": {
-        "id": "1",
-        "type": "sector"
+        "data": {
+          "id": "1",
+          "type": "sector"
+        }
       }
     }
   },
@@ -166,10 +174,12 @@ This example shows how to filter which relationships are returned. When you have
 	- Resource:
 		- Type: `sector`
 		- Relationship Name: `sector`
+		- Relationship Type: `One to One` (default)
 		- Attributes: `{"id": "1", "name": "Technology"}`
 	- Resource:
 		- Type: `owner`
 		- Relationship Name: `owner`
+		- Relationship Type: `One to One` (default)
 		- Attributes: `{"id": "1", "name": "Boss"}`
 
 **Output:**
@@ -218,9 +228,13 @@ Note that even though both `sector` and `owner` are configured as Include Resour
 - Include Resources:
   - Resource:
     - Type: `sector`
+    - Relationship Name: `sector`
+    - Relationship Type: `One to One` (default)
     - Attributes: `{"id": "1", "name": "Technology"}`
   - Resource:
     - Type: `owner`
+    - Relationship Name: `owner`
+    - Relationship Type: `One to One` (default)
     - Attributes: `{"id": "1", "name": "Boss"}`
 
 **Output:**
@@ -236,12 +250,16 @@ Note that even though both `sector` and `owner` are configured as Include Resour
     },
     "relationships": {
       "sector": {
-        "id": "1",
-        "type": "sector"
+        "data": {
+          "id": "1",
+          "type": "sector"
+        }
       },
       "owner": {
-        "id": "1",
-        "type": "owner"
+        "data": {
+          "id": "1",
+          "type": "owner"
+        }
       }
     }
   },
@@ -279,6 +297,7 @@ You can specify a custom name for relationships that differs from the resource t
   - Resource:
     - Type: `organization`
     - Relationship Name: `membership`
+    - Relationship Type: `One to One` (default)
     - Attributes: `{"id": "42", "name": "Agile Freaks SRL", "country": "Romania", "region": "Sibiu"}`
 
 **Output:**
@@ -314,6 +333,68 @@ You can specify a custom name for relationships that differs from the resource t
 ```
 
 In this example, even though the resource type is `organization`, the relationship is named `membership` to better represent the semantic relationship between a contact and their organization.
+
+### Example with One-to-Many Relationships
+
+Use **Relationship Type: One to Many** when a resource has multiple related items of the same type (e.g., a contact with multiple roles). Instead of configuring a single attributes object, provide a **Source Array** expression that resolves to an array of objects and an optional **Attribute Keys** list.
+
+**Input parameters:**
+- Response: `Resource Object`
+- Type: `contact`
+- ID: `42`
+- Attributes: `{"name": "Mister Daniel"}`
+- Enable Include Relationships: `true`
+- Include Filter: `roles`
+- Include Resources:
+  - Resource:
+    - Type: `role`
+    - Relationship Name: `roles`
+    - Relationship Type: `One to Many`
+    - Source Array: `={{ $json.roles }}` (resolves to `[{"id": "10", "name": "CEO"}, {"id": "11", "name": "Contact Point"}]`)
+    - Attribute Keys: `id,name`
+
+**Output:**
+```json
+{
+  "data": {
+    "id": "42",
+    "type": "contact",
+    "attributes": {
+      "name": "Mister Daniel"
+    },
+    "relationships": {
+      "roles": {
+        "data": [
+          { "id": "10", "type": "role" },
+          { "id": "11", "type": "role" }
+        ]
+      }
+    }
+  },
+  "included": [
+    {
+      "id": "10",
+      "type": "role",
+      "attributes": {
+        "name": "CEO"
+      }
+    },
+    {
+      "id": "11",
+      "type": "role",
+      "attributes": {
+        "name": "Contact Point"
+      }
+    }
+  ]
+}
+```
+
+**One-to-Many Notes:**
+- **Source Array** accepts an n8n expression that resolves to a JSON array at runtime — ideal for dynamic data from upstream nodes
+- **Attribute Keys** is a comma-separated list of fields to extract from each array item (e.g. `id,name`). Leave empty to include all fields
+- The `id` field is always extracted from each item and used as the resource identifier — it will not appear in `attributes`
+- Each item in the source array becomes a separate entry in both `relationships.data` and `included`
 
 ### Example with Pagination
 
@@ -373,9 +454,12 @@ In this example, even though the resource type is `organization`, the relationsh
 ### Tips
 - The **Attributes** field accepts JSON format - make sure your JSON is valid
 - The **Include Resources** field is optional. Add one or more resources that will appear in both the `relationships` and `included` sections
-  - Each included resource requires a **Type**
-  - The **Relationship Name** is required and specifies the key name for the relationship in the output
-  - The **Attributes** must be a JSON object that includes an `id` field - this `id` will be extracted and used for the relationship reference
+  - Each included resource requires a **Type**, a **Relationship Name**, and a **Relationship Type**
+  - **Relationship Type** controls the output format:
+    - `One to One` (default): provide **Attributes** as a JSON object including an `id` field. Outputs `{ "data": { "id": "…", "type": "…" } }`
+    - `One to Many`: provide a **Source Array** expression and an optional **Attribute Keys** list. Outputs `{ "data": [ … ] }` — always an array, even when empty
+  - The `id` field is always extracted from each resource and used as the relationship identifier — it will not appear in `attributes`
+  - Empty to-many relationships (`data: []`) are valid per the JSON API spec and will be included in the output
 - Use the **Resource Object** response type when you need to serialize a single item
 - Use the **Resources Array** response type when working with multiple items from previous nodes
 - The node follows the [JSON API v1.0 specification](https://jsonapi.org/format/)
@@ -443,10 +527,6 @@ npm publish
 
 ## TODO
 
-### Array Support for Relationships
-Currently, relationships and included resources work only with single object responses. The following enhancements are planned:
-
-- [ ] Support relationships and included resources for array responses
 - [ ] Add Error Json Api Serializer node
 
 ## License

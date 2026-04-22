@@ -2,8 +2,13 @@ export interface Resource {
 	id: string;
 	type: string;
 	attributes: any;
-	relationships?: Resource[];
-	relationshipName?: string;
+	relationships?: Relationship[];
+}
+
+export interface Relationship {
+	name: string;
+	relationshipType: RelationshipType;
+	resources: Resource[];
 }
 
 export interface PaginationConfig {
@@ -43,6 +48,11 @@ export interface JsonApiResource {
 	type: string;
 	attributes: any;
 	relationships?: any;
+}
+
+export enum RelationshipType {
+	ONE_TO_ONE = 'one-to-one',
+	ONE_TO_MANY = 'one-to-many',
 }
 
 export enum ResponseType {
